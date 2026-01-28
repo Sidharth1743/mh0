@@ -1,8 +1,10 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { CheckCircle2, LogOut, MessageSquare, Mic, Plus, Send, Smile, User } from 'lucide-react-native';
 import React, { useState } from 'react';
-import { FlatList, KeyboardAvoidingView, Modal, Platform, SafeAreaView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { FlatList, KeyboardAvoidingView, Modal, Platform, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import Animated, { FadeInRight, SlideInDown, ZoomIn } from 'react-native-reanimated';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { BuddyTheme } from '../../constants/BuddyTheme';
 
 interface TaskItem {
     id: string;
@@ -21,7 +23,7 @@ export default function TaskScreen() {
     const { id } = useLocalSearchParams();
     const router = useRouter();
     const [items, setItems] = useState<TaskItem[]>([
-        { id: '1', text: 'Stardew Valley but in AR', addedBy: 'partner', timestamp: '2m ago' }
+        { id: '1', text: 'Distributed systems in mobile architecture', addedBy: 'partner', timestamp: '2m ago' }
     ]);
     const [inputText, setInputText] = useState('');
 
@@ -40,13 +42,12 @@ export default function TaskScreen() {
 
     const addItem = () => {
         if (!inputText.trim()) return;
-        const newItem: TaskItem = {
+        setItems([...items, {
             id: Date.now().toString(),
             text: inputText,
             addedBy: 'me',
             timestamp: 'Just now'
-        };
-        setItems([...items, newItem]);
+        }]);
         setInputText('');
     };
 
@@ -57,14 +58,10 @@ export default function TaskScreen() {
             setTaskCount(nextCount);
             setIsDone(false);
             setItems([]);
-            if (nextCount === 2) {
-                alert("Level 2 Unlocked! Short chat available.");
-            } else if (nextCount === 4) {
-                alert("Level 3 Unlocked! Voice mode available.");
-            } else if (nextCount === 6) {
+            if (nextCount === 6) {
                 setShowReveal(true);
             }
-        }, 1500);
+        }, 1200);
     };
 
     const sendMessage = () => {
@@ -72,6 +69,8 @@ export default function TaskScreen() {
         setMessages([...messages, { id: Date.now().toString(), text: chatInput, sender: 'me' }]);
         setChatInput('');
     };
+
+    const partnerName = revealed ? 'Alex Chen' : 'Participant #17';
 
     return (
         <SafeAreaView style={styles.container}>
@@ -82,24 +81,24 @@ export default function TaskScreen() {
                 <View style={styles.header}>
                     <View>
                         <Text style={styles.taskTitle}>
-                            {taskCount === 1 ? 'Book-Tech Mashup' : taskCount < 4 ? 'Sci-Fi Gadget Vote' : 'Riddle Solve'}
+                            {taskCount === 1 ? 'Architecture Analysis' : taskCount < 4 ? 'Strategic Planning' : 'Problem Solving'}
                         </Text>
                         <Text style={styles.taskSubtitle}>
-                            Task {taskCount}/∞ with {revealed ? 'Alex' : 'MysticReader17'}
+                            Phase {taskCount} • Session with {partnerName}
                         </Text>
                     </View>
-                    <TouchableOpacity style={styles.leaveButton} onPress={() => router.back()}>
-                        <LogOut size={20} color="#94A3B8" />
+                    <TouchableOpacity activeOpacity={0.7} style={styles.leaveButton} onPress={() => router.back()}>
+                        <LogOut size={22} color={BuddyTheme.colors.textSecondary} />
                     </TouchableOpacity>
                 </View>
 
                 <View style={styles.descriptionBox}>
                     <Text style={styles.descriptionText}>
                         {taskCount === 1
-                            ? 'Create a list of "books that should become apps or games". Take turns.'
+                            ? 'Iteratively build a list of core principles for scalable mobile architecture.'
                             : taskCount < 4
-                                ? 'Suggest 3 sci-fi gadgets and vote on which is most likely to exist in 10 years.'
-                                : 'Solve this riddle: I speak without a mouth and hear without ears...'}
+                                ? 'Review the proposed strategies and identify the top 3 highest impact items.'
+                                : 'Identify the logical architectural flaw in the provided system diagram.'}
                     </Text>
                 </View>
 
@@ -117,7 +116,7 @@ export default function TaskScreen() {
                         >
                             <View style={styles.itemHeader}>
                                 <Text style={styles.itemAuthor}>
-                                    {item.addedBy === 'me' ? 'You' : revealed ? 'Alex' : 'MysticReader17'}
+                                    {item.addedBy === 'me' ? 'You' : partnerName}
                                 </Text>
                                 <Text style={styles.itemTime}>{item.timestamp}</Text>
                             </View>
@@ -130,12 +129,12 @@ export default function TaskScreen() {
                     <View style={styles.inputRow}>
                         <TextInput
                             style={styles.input}
-                            placeholder="Suggest an idea..."
-                            placeholderTextColor="#64748B"
+                            placeholder="Add your input..."
+                            placeholderTextColor={BuddyTheme.colors.textSecondary}
                             value={inputText}
                             onChangeText={setInputText}
                         />
-                        <TouchableOpacity style={styles.addButton} onPress={addItem}>
+                        <TouchableOpacity style={styles.addButton} onPress={addItem} activeOpacity={0.8}>
                             <Plus size={24} color="#FFF" />
                         </TouchableOpacity>
                     </View>
@@ -144,31 +143,33 @@ export default function TaskScreen() {
                         <TouchableOpacity
                             style={[styles.chatButton, !chatUnlocked && styles.chatLocked]}
                             onPress={() => chatUnlocked && setShowChat(true)}
+                            activeOpacity={0.7}
                         >
-                            <MessageSquare size={20} color={chatUnlocked ? "#3B82F6" : "#475569"} />
+                            <MessageSquare size={20} color={chatUnlocked ? BuddyTheme.colors.primary : "#94A3B8"} />
                             <Text style={[styles.chatButtonText, !chatUnlocked && styles.lockedText]}>
-                                {chatUnlocked ? 'Short Chat' : 'Chat locked'}
+                                {chatUnlocked ? 'Quick Chat' : 'Chat Restricted'}
                             </Text>
                         </TouchableOpacity>
 
                         {voiceUnlocked && (
-                            <TouchableOpacity style={styles.voiceButton}>
+                            <TouchableOpacity style={styles.voiceButton} activeOpacity={0.8}>
                                 <Mic size={20} color="#FFF" />
                             </TouchableOpacity>
                         )}
 
                         <TouchableOpacity
-                            style={[styles.doneButton, (items.length < 2 && taskCount < 4 && !isDone) && styles.doneDisabled]}
+                            style={[styles.doneButton, (items.length < 1 && !isDone) && styles.doneDisabled]}
                             onPress={completeTask}
-                            disabled={(items.length < 2 && taskCount < 4) || isDone}
+                            disabled={items.length < 1 || isDone}
+                            activeOpacity={0.8}
                         >
-                            <Text style={styles.doneText}>{isDone ? 'Waiting...' : "I'm Done"}</Text>
-                            <CheckCircle2 size={20} color="#FFF" />
+                            <Text style={styles.doneText}>{isDone ? 'Syncing...' : "Finish Phase"}</Text>
+                            <CheckCircle2 size={18} color="#FFF" />
                         </TouchableOpacity>
                     </View>
                 </View>
 
-                {/* Level 2 Chat Modal */}
+                {/* Chat Modal */}
                 <Modal
                     visible={showChat}
                     animationType="slide"
@@ -178,9 +179,9 @@ export default function TaskScreen() {
                     <View style={styles.modalOverlay}>
                         <Animated.View entering={SlideInDown} style={styles.modalContent}>
                             <View style={styles.modalHeader}>
-                                <Text style={styles.modalTitle}>Task Chat</Text>
+                                <Text style={styles.modalTitle}>Session Chat</Text>
                                 <TouchableOpacity onPress={() => setShowChat(false)}>
-                                    <Text style={styles.closeText}>Close</Text>
+                                    <Text style={styles.closeText}>Hide</Text>
                                 </TouchableOpacity>
                             </View>
 
@@ -193,31 +194,31 @@ export default function TaskScreen() {
                                         styles.messageBubble,
                                         item.sender === 'me' ? styles.myMessage : styles.theirMessage
                                     ]}>
-                                        <Text style={styles.messageText}>{item.text}</Text>
+                                        <Text style={[styles.messageText, item.sender === 'partner' && styles.darkText]}>{item.text}</Text>
                                     </View>
                                 )}
                             />
 
                             <View style={styles.chatInputRow}>
                                 <TouchableOpacity style={styles.emojiButton}>
-                                    <Smile size={24} color="#64748B" />
+                                    <Smile size={24} color={BuddyTheme.colors.textSecondary} />
                                 </TouchableOpacity>
                                 <TextInput
                                     style={styles.chatInput}
-                                    placeholder="Type a quick reaction..."
-                                    placeholderTextColor="#64748B"
+                                    placeholder="Type a message..."
+                                    placeholderTextColor={BuddyTheme.colors.textSecondary}
                                     value={chatInput}
                                     onChangeText={setChatInput}
                                 />
-                                <TouchableOpacity style={styles.sendButton} onPress={sendMessage}>
-                                    <Send size={20} color="#FFF" />
+                                <TouchableOpacity style={styles.sendButton} onPress={sendMessage} activeOpacity={0.8}>
+                                    <Send size={18} color="#FFF" />
                                 </TouchableOpacity>
                             </View>
                         </Animated.View>
                     </View>
                 </Modal>
 
-                {/* Level 4 Reveal Modal */}
+                {/* Identity Reveal Modal */}
                 <Modal
                     visible={showReveal}
                     animationType="fade"
@@ -225,13 +226,14 @@ export default function TaskScreen() {
                 >
                     <View style={styles.revealOverlay}>
                         <Animated.View entering={ZoomIn} style={styles.revealContent}>
-                            <Text style={styles.revealTitle}>Level 4 Unlock! 🎯</Text>
+                            <Text style={styles.revealTitle}>Layer 4 Established</Text>
                             <Text style={styles.revealSubtitle}>
-                                You've built 7 shared moments with MysticReader17. Feeling ready to know each other?
+                                Sufficient shared history has been recorded. Mutual identity disclosure is now available.
                             </Text>
 
                             <View style={styles.revealActions}>
                                 <TouchableOpacity
+                                    activeOpacity={0.9}
                                     style={styles.revealButton}
                                     onPress={() => {
                                         setRevealed(true);
@@ -239,14 +241,14 @@ export default function TaskScreen() {
                                     }}
                                 >
                                     <User size={20} color="#FFF" />
-                                    <Text style={styles.revealButtonText}>Reveal Identity</Text>
+                                    <Text style={styles.revealButtonText}>Reveal My Identity</Text>
                                 </TouchableOpacity>
 
                                 <TouchableOpacity
                                     style={styles.notReadyButton}
                                     onPress={() => setShowReveal(false)}
                                 >
-                                    <Text style={styles.notReadyText}>Not yet, stay anonymous</Text>
+                                    <Text style={styles.notReadyText}>Continue Anonymously</Text>
                                 </TouchableOpacity>
                             </View>
                         </Animated.View>
@@ -260,55 +262,60 @@ export default function TaskScreen() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#0F172A',
+        backgroundColor: BuddyTheme.colors.background,
     },
     header: {
-        padding: 24,
+        padding: 32,
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'flex-start',
     },
     taskTitle: {
-        fontSize: 24,
+        fontSize: 26,
         fontWeight: 'bold',
-        color: '#F8FAFC',
+        color: BuddyTheme.colors.primary,
     },
     taskSubtitle: {
-        fontSize: 14,
-        color: '#64748B',
+        fontSize: 15,
+        color: BuddyTheme.colors.textSecondary,
         marginTop: 4,
+        fontWeight: '500',
     },
     leaveButton: {
         padding: 8,
     },
     descriptionBox: {
-        margin: 24,
-        marginTop: 0,
-        padding: 16,
-        backgroundColor: 'rgba(59, 130, 246, 0.05)',
-        borderRadius: 16,
-        borderWidth: 1,
-        borderColor: 'rgba(59, 130, 246, 0.2)',
+        marginHorizontal: 32,
+        marginBottom: 24,
+        padding: 20,
+        backgroundColor: BuddyTheme.colors.surface,
+        borderRadius: BuddyTheme.borderRadius.lg,
+        borderWidth: 1.5,
+        borderColor: BuddyTheme.colors.border,
     },
     descriptionText: {
-        color: '#CBD5E1',
-        lineHeight: 20,
-        fontSize: 14,
+        color: BuddyTheme.colors.textPrimary,
+        lineHeight: 24,
+        fontSize: 15,
     },
     listContent: {
-        padding: 24,
-        paddingTop: 0,
+        paddingHorizontal: 32,
         gap: 16,
+        paddingBottom: 40,
     },
     itemCard: {
-        backgroundColor: '#1E293B',
-        padding: 16,
-        borderRadius: 16,
-        borderLeftWidth: 4,
-        borderLeftColor: '#3B82F6',
+        backgroundColor: BuddyTheme.colors.surface,
+        padding: 20,
+        borderRadius: BuddyTheme.borderRadius.lg,
+        borderLeftWidth: 6,
+        borderLeftColor: BuddyTheme.colors.primary,
+        shadowColor: '#000',
+        shadowOpacity: 0.04,
+        shadowRadius: 10,
+        elevation: 2,
     },
     partnerItem: {
-        borderLeftColor: '#A855F7',
+        borderLeftColor: BuddyTheme.colors.secondary,
     },
     itemHeader: {
         flexDirection: 'row',
@@ -316,44 +323,47 @@ const styles = StyleSheet.create({
         marginBottom: 8,
     },
     itemAuthor: {
-        fontSize: 12,
-        fontWeight: 'bold',
-        color: '#94A3B8',
+        fontSize: 13,
+        fontWeight: '800',
+        color: BuddyTheme.colors.textSecondary,
+        letterSpacing: 0.5,
     },
     itemTime: {
-        fontSize: 10,
-        color: '#64748B',
+        fontSize: 11,
+        color: BuddyTheme.colors.textSecondary,
     },
     itemText: {
-        color: '#F8FAFC',
+        color: BuddyTheme.colors.textPrimary,
         fontSize: 16,
         lineHeight: 24,
     },
     inputArea: {
-        padding: 24,
-        backgroundColor: '#0F172A',
-        borderTopWidth: 1,
-        borderTopColor: '#1E293B',
+        padding: 32,
+        backgroundColor: BuddyTheme.colors.surface,
+        borderTopWidth: 1.5,
+        borderTopColor: BuddyTheme.colors.border,
     },
     inputRow: {
         flexDirection: 'row',
         gap: 12,
-        marginBottom: 16,
+        marginBottom: 20,
     },
     input: {
         flex: 1,
-        backgroundColor: '#1E293B',
-        borderRadius: 12,
+        backgroundColor: BuddyTheme.colors.background,
+        borderRadius: 14,
         paddingHorizontal: 16,
-        paddingVertical: 12,
-        color: '#F8FAFC',
+        paddingVertical: 14,
+        color: BuddyTheme.colors.textPrimary,
         fontSize: 16,
+        borderWidth: 1.5,
+        borderColor: BuddyTheme.colors.border,
     },
     addButton: {
-        backgroundColor: '#3B82F6',
-        width: 48,
-        height: 48,
-        borderRadius: 12,
+        backgroundColor: BuddyTheme.colors.primary,
+        width: 54,
+        height: 54,
+        borderRadius: 14,
         alignItems: 'center',
         justifyContent: 'center',
     },
@@ -368,160 +378,172 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         gap: 8,
         flex: 1,
-        backgroundColor: 'rgba(59, 130, 246, 0.1)',
-        padding: 12,
-        borderRadius: 12,
+        backgroundColor: BuddyTheme.colors.background,
+        paddingHorizontal: 16,
+        paddingVertical: 14,
+        borderRadius: 14,
+        borderWidth: 1.5,
+        borderColor: BuddyTheme.colors.border,
     },
     chatButtonText: {
-        color: '#3B82F6',
-        fontWeight: '600',
+        color: BuddyTheme.colors.primary,
+        fontWeight: '700',
         fontSize: 14,
     },
     chatLocked: {
-        backgroundColor: 'transparent',
+        opacity: 0.5,
     },
     lockedText: {
-        color: '#475569',
+        color: BuddyTheme.colors.textSecondary,
     },
     voiceButton: {
-        backgroundColor: '#A855F7',
-        width: 48,
-        height: 48,
-        borderRadius: 12,
+        backgroundColor: BuddyTheme.colors.accent,
+        width: 54,
+        height: 54,
+        borderRadius: 14,
         alignItems: 'center',
         justifyContent: 'center',
     },
     doneButton: {
-        backgroundColor: '#10B981',
+        backgroundColor: BuddyTheme.colors.secondary,
         flexDirection: 'row',
         alignItems: 'center',
         gap: 8,
         paddingHorizontal: 20,
-        paddingVertical: 12,
-        borderRadius: 12,
+        paddingVertical: 14,
+        borderRadius: 14,
     },
     doneDisabled: {
-        backgroundColor: '#1E293B',
-        opacity: 0.5,
+        backgroundColor: BuddyTheme.colors.border,
     },
     doneText: {
         color: '#FFF',
-        fontWeight: 'bold',
+        fontWeight: '800',
+        fontSize: 15,
     },
     modalOverlay: {
         flex: 1,
-        backgroundColor: 'rgba(0,0,0,0.5)',
+        backgroundColor: 'rgba(0,0,0,0.4)',
         justifyContent: 'flex-end',
     },
     modalContent: {
-        backgroundColor: '#1E293B',
+        backgroundColor: BuddyTheme.colors.surface,
         borderTopLeftRadius: 32,
         borderTopRightRadius: 32,
-        height: '60%',
-        padding: 24,
+        height: '75%',
+        padding: 32,
     },
     modalHeader: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        marginBottom: 20,
+        marginBottom: 24,
     },
     modalTitle: {
-        color: '#F8FAFC',
-        fontSize: 20,
+        color: BuddyTheme.colors.primary,
+        fontSize: 22,
         fontWeight: 'bold',
     },
     closeText: {
-        color: '#3B82F6',
-        fontWeight: '500',
+        color: BuddyTheme.colors.secondary,
+        fontWeight: '700',
+        fontSize: 16,
     },
     messageList: {
         flex: 1,
-        marginBottom: 16,
+        marginBottom: 24,
     },
     messageBubble: {
-        maxWidth: '80%',
-        padding: 12,
-        borderRadius: 16,
+        maxWidth: '85%',
+        padding: 16,
+        borderRadius: 18,
         marginBottom: 12,
     },
     myMessage: {
         alignSelf: 'flex-end',
-        backgroundColor: '#3B82F6',
+        backgroundColor: BuddyTheme.colors.primary,
         borderBottomRightRadius: 4,
     },
     theirMessage: {
         alignSelf: 'flex-start',
-        backgroundColor: '#334155',
+        backgroundColor: BuddyTheme.colors.background,
         borderBottomLeftRadius: 4,
+        borderWidth: 1.5,
+        borderColor: BuddyTheme.colors.border,
     },
     messageText: {
         color: '#FFF',
         fontSize: 16,
+        lineHeight: 22,
+    },
+    darkText: {
+        color: BuddyTheme.colors.textPrimary,
     },
     chatInputRow: {
         flexDirection: 'row',
         alignItems: 'center',
         gap: 12,
-        backgroundColor: '#0F172A',
-        borderRadius: 16,
-        padding: 8,
+        backgroundColor: BuddyTheme.colors.background,
+        borderRadius: 20,
+        padding: 10,
+        borderWidth: 1.5,
+        borderColor: BuddyTheme.colors.border,
     },
     chatInput: {
         flex: 1,
-        color: '#F8FAFC',
+        color: BuddyTheme.colors.textPrimary,
         fontSize: 16,
-        paddingVertical: 8,
+        paddingVertical: 10,
     },
     emojiButton: {
         padding: 4,
     },
     sendButton: {
-        backgroundColor: '#3B82F6',
-        width: 40,
-        height: 40,
-        borderRadius: 10,
+        backgroundColor: BuddyTheme.colors.primary,
+        width: 44,
+        height: 44,
+        borderRadius: 12,
         alignItems: 'center',
         justifyContent: 'center',
     },
     revealOverlay: {
         flex: 1,
-        backgroundColor: 'rgba(0,0,0,0.8)',
+        backgroundColor: 'rgba(0,0,0,0.85)',
         justifyContent: 'center',
-        padding: 24,
+        padding: 32,
     },
     revealContent: {
-        backgroundColor: '#1E293B',
+        backgroundColor: BuddyTheme.colors.surface,
         borderRadius: 32,
-        padding: 32,
+        padding: 40,
         alignItems: 'center',
-        borderWidth: 1,
-        borderColor: '#3B82F6',
+        borderWidth: 2,
+        borderColor: BuddyTheme.colors.secondary,
     },
     revealTitle: {
-        color: '#F8FAFC',
+        color: BuddyTheme.colors.primary,
         fontSize: 28,
         fontWeight: 'bold',
         marginBottom: 16,
     },
     revealSubtitle: {
-        color: '#94A3B8',
-        fontSize: 16,
+        color: BuddyTheme.colors.textSecondary,
+        fontSize: 17,
         textAlign: 'center',
-        lineHeight: 24,
-        marginBottom: 32,
+        lineHeight: 26,
+        marginBottom: 40,
     },
     revealActions: {
         width: '100%',
-        gap: 12,
+        gap: 16,
     },
     revealButton: {
-        backgroundColor: '#3B82F6',
+        backgroundColor: BuddyTheme.colors.primary,
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
         gap: 12,
-        paddingVertical: 18,
+        paddingVertical: 20,
         borderRadius: 16,
     },
     revealButtonText: {
@@ -534,7 +556,8 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     notReadyText: {
-        color: '#64748B',
-        fontSize: 14,
+        color: BuddyTheme.colors.textSecondary,
+        fontSize: 15,
+        fontWeight: '600',
     },
 });

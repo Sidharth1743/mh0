@@ -1,18 +1,20 @@
 import { Calendar, CheckCircle2, History } from 'lucide-react-native';
 import React from 'react';
-import { FlatList, SafeAreaView, StyleSheet, Text, View } from 'react-native';
+import { FlatList, StyleSheet, Text, View } from 'react-native';
 import Animated, { FadeInUp } from 'react-native-reanimated';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { BuddyTheme } from '../../constants/BuddyTheme';
 
 const PAST_TASKS = [
-  { id: '1', title: 'Book-Tech Mashup', partner: 'MysticReader17', date: 'Jan 28, 2026', reactions: '👍🔥' },
-  { id: '2', title: 'Sci-Fi Gadget Vote', partner: 'MysticReader17', date: 'Jan 28, 2026', reactions: '🚀😂' },
+  { id: '1', title: 'Architecture Analysis', partner: 'Participant #17', date: 'Jan 28, 2026', reactions: 'Sync Successful' },
+  { id: '2', title: 'System Documentation', partner: 'Participant #09', date: 'Jan 28, 2026', reactions: 'Collaborative Excellence' },
 ];
 
 export default function HistoryScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.title}>History</Text>
+        <Text style={styles.title}>Session History</Text>
       </View>
 
       <FlatList
@@ -21,9 +23,9 @@ export default function HistoryScreen() {
         contentContainerStyle={styles.listContent}
         ListEmptyComponent={
           <View style={styles.emptyState}>
-            <History size={48} color="#334155" />
-            <Text style={styles.emptyText}>No tasks completed yet.</Text>
-            <Text style={styles.emptySubtext}>Your shared moments will appear here.</Text>
+            <History size={48} color={BuddyTheme.colors.textSecondary} />
+            <Text style={styles.emptyText}>No historical data available.</Text>
+            <Text style={styles.emptySubtext}>Validated sessions will appear here.</Text>
           </View>
         }
         renderItem={({ item, index }) => (
@@ -33,20 +35,20 @@ export default function HistoryScreen() {
           >
             <View style={styles.cardHeader}>
               <View style={styles.dateContainer}>
-                <Calendar size={14} color="#64748B" />
+                <Calendar size={14} color={BuddyTheme.colors.textSecondary} />
                 <Text style={styles.dateText}>{item.date}</Text>
               </View>
               <View style={styles.statusContainer}>
-                <CheckCircle2 size={14} color="#10B981" />
-                <Text style={styles.statusText}>Completed</Text>
+                <CheckCircle2 size={14} color={BuddyTheme.colors.secondary} />
+                <Text style={styles.statusText}>Validated</Text>
               </View>
             </View>
 
             <Text style={styles.taskTitle}>{item.title}</Text>
-            <Text style={styles.partnerText}>with {item.partner}</Text>
+            <Text style={styles.partnerText}>Co-contributor: {item.partner}</Text>
 
             <View style={styles.footer}>
-              <Text style={styles.reactionsText}>Reactions: {item.reactions}</Text>
+              <Text style={styles.reactionsText}>{item.reactions}</Text>
             </View>
           </Animated.View>
         )}
@@ -58,49 +60,52 @@ export default function HistoryScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0F172A',
+    backgroundColor: BuddyTheme.colors.background,
   },
   header: {
-    padding: 24,
+    padding: 32,
   },
   title: {
-    fontSize: 24,
+    fontSize: 28,
     fontWeight: 'bold',
-    color: '#F8FAFC',
+    color: BuddyTheme.colors.primary,
   },
   listContent: {
-    padding: 24,
-    paddingTop: 0,
+    paddingHorizontal: 32,
     gap: 16,
+    paddingBottom: 40,
   },
   emptyState: {
-    flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
     paddingTop: 100,
   },
   emptyText: {
-    color: '#94A3B8',
+    color: BuddyTheme.colors.textPrimary,
     fontSize: 18,
     fontWeight: 'bold',
     marginTop: 16,
   },
   emptySubtext: {
-    color: '#64748B',
+    color: BuddyTheme.colors.textSecondary,
     fontSize: 14,
     marginTop: 8,
   },
   historyCard: {
-    backgroundColor: '#1E293B',
-    padding: 20,
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: '#334155',
+    backgroundColor: BuddyTheme.colors.surface,
+    padding: 24,
+    borderRadius: BuddyTheme.borderRadius.lg,
+    borderWidth: 1.5,
+    borderColor: BuddyTheme.colors.border,
+    shadowColor: '#000',
+    shadowOpacity: 0.03,
+    shadowRadius: 10,
+    elevation: 2,
   },
   cardHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 12,
+    marginBottom: 16,
   },
   dateContainer: {
     flexDirection: 'row',
@@ -108,8 +113,9 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   dateText: {
-    color: '#64748B',
+    color: BuddyTheme.colors.textSecondary,
     fontSize: 12,
+    fontWeight: '600',
   },
   statusContainer: {
     flexDirection: 'row',
@@ -117,28 +123,31 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   statusText: {
-    color: '#10B981',
+    color: BuddyTheme.colors.secondary,
     fontSize: 12,
-    fontWeight: '600',
+    fontWeight: '700',
   },
   taskTitle: {
-    color: '#F8FAFC',
-    fontSize: 18,
+    color: BuddyTheme.colors.primary,
+    fontSize: 20,
     fontWeight: 'bold',
-    marginBottom: 4,
+    marginBottom: 6,
   },
   partnerText: {
-    color: '#94A3B8',
+    color: BuddyTheme.colors.textSecondary,
     fontSize: 14,
-    marginBottom: 16,
+    fontWeight: '500',
+    marginBottom: 20,
   },
   footer: {
-    borderTopWidth: 1,
-    borderTopColor: '#334155',
-    paddingTop: 12,
+    borderTopWidth: 1.5,
+    borderTopColor: BuddyTheme.colors.background,
+    paddingTop: 16,
   },
   reactionsText: {
-    color: '#CBD5E1',
-    fontSize: 14,
+    color: BuddyTheme.colors.secondary,
+    fontSize: 13,
+    fontWeight: '700',
+    letterSpacing: 0.5,
   },
 });

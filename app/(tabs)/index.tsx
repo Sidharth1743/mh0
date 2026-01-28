@@ -1,21 +1,22 @@
 import { useRouter } from 'expo-router';
-import { Shield, Users, Zap } from 'lucide-react-native';
+import { Layout, Shield, Zap } from 'lucide-react-native';
 import React, { useState } from 'react';
-import { ActivityIndicator, SafeAreaView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { BuddyTheme } from '../../constants/BuddyTheme';
 
 export default function TabOneScreen() {
   const [isMatching, setIsMatching] = useState(false);
   const [matchFound, setMatchFound] = useState(false);
   const router = useRouter();
 
-  // Simulation of matching process
   const startMatching = () => {
     setIsMatching(true);
     setTimeout(() => {
       setMatchFound(true);
       setIsMatching(false);
-    }, 3000);
+    }, 2500);
   };
 
   if (matchFound) {
@@ -23,18 +24,20 @@ export default function TabOneScreen() {
       <SafeAreaView style={styles.container}>
         <View style={styles.matchContent}>
           <Animated.View entering={FadeIn} style={styles.matchCard}>
-            <Text style={styles.matchTitle}>Match Found! 🎉</Text>
-            <Text style={styles.matchSubtitle}>You're matched with MysticReader17</Text>
+            <Text style={styles.matchLabel}>ACTIVE PARTNERSHIP</Text>
+            <Text style={styles.matchTitle}>Session Established</Text>
+            <Text style={styles.matchSubtitle}>You are matched with Participant #17</Text>
 
             <View style={styles.commonContainer}>
-              <Text style={styles.commonText}>You both like: Books, Tech</Text>
+              <Text style={styles.commonText}>Shared focus: Literature, Technology</Text>
             </View>
 
             <TouchableOpacity
+              activeOpacity={0.8}
               style={styles.taskButton}
               onPress={() => router.push('/task/123')}
             >
-              <Text style={styles.buttonText}>Start Level 1 Task</Text>
+              <Text style={styles.buttonText}>Initialize Layer 1 Task</Text>
             </TouchableOpacity>
           </Animated.View>
         </View>
@@ -45,36 +48,37 @@ export default function TabOneScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.title}>TaskFriends</Text>
-        <TouchableOpacity style={styles.statsButton}>
-          <Shield size={20} color="#3B82F6" />
-          <Text style={styles.statsText}>Level 1</Text>
-        </TouchableOpacity>
+        <Text style={styles.title}>Dashboard</Text>
+        <View style={styles.statsBadge}>
+          <Shield size={16} color={BuddyTheme.colors.secondary} />
+          <Text style={styles.statsText}>Layer 1</Text>
+        </View>
       </View>
 
       <View style={styles.main}>
         {isMatching ? (
           <Animated.View entering={FadeIn} exiting={FadeOut} style={styles.matchingState}>
-            <ActivityIndicator size="large" color="#3B82F6" />
-            <Text style={styles.matchingText}>Searching for buddies...</Text>
-            <Text style={styles.matchingSubtext}>87% of first tasks lead to a second one!</Text>
+            <ActivityIndicator size="large" color={BuddyTheme.colors.secondary} />
+            <Text style={styles.matchingText}>Synchronizing nodes...</Text>
+            <Text style={styles.matchingSubtext}>Finding a partner within your wavelength.</Text>
           </Animated.View>
         ) : (
           <Animated.View entering={FadeIn} style={styles.idleState}>
-            <View style={styles.heroIcon}>
-              <Users size={48} color="#3B82F6" />
+            <View style={styles.heroCircle}>
+              <Layout size={40} color={BuddyTheme.colors.primary} />
             </View>
-            <Text style={styles.heroTitle}>Ready for a task?</Text>
+            <Text style={styles.heroTitle}>Initiate Collaboration</Text>
             <Text style={styles.heroDescription}>
-              No profiles. No small talk. Just doing stuff together.
+              Anonymous, task-based networking. Trust build through shared execution.
             </Text>
 
             <TouchableOpacity
+              activeOpacity={0.8}
               style={styles.findButton}
               onPress={startMatching}
             >
               <Zap size={20} color="#FFF" />
-              <Text style={styles.buttonText}>Find Buddy</Text>
+              <Text style={styles.findButtonText}>Find Partner</Text>
             </TouchableOpacity>
           </Animated.View>
         )}
@@ -86,75 +90,77 @@ export default function TabOneScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0F172A',
+    backgroundColor: BuddyTheme.colors.background,
   },
   header: {
-    padding: 24,
+    padding: 32,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
   },
   title: {
-    fontSize: 24,
+    fontSize: 28,
     fontWeight: 'bold',
-    color: '#F8FAFC',
+    color: BuddyTheme.colors.primary,
   },
-  statsButton: {
+  statsBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(59, 130, 246, 0.1)',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 99,
-    gap: 6,
+    backgroundColor: 'rgba(38, 166, 154, 0.1)',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: BuddyTheme.borderRadius.full,
+    gap: 8,
   },
   statsText: {
-    color: '#3B82F6',
-    fontWeight: '600',
+    color: BuddyTheme.colors.secondary,
+    fontWeight: '700',
+    fontSize: 14,
   },
   main: {
     flex: 1,
     justifyContent: 'center',
-    padding: 24,
+    paddingHorizontal: 32,
   },
   idleState: {
     alignItems: 'center',
   },
-  heroIcon: {
-    width: 96,
-    height: 96,
-    borderRadius: 48,
-    backgroundColor: 'rgba(59, 130, 246, 0.1)',
+  heroCircle: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    backgroundColor: BuddyTheme.colors.surface,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 24,
+    marginBottom: 32,
+    borderWidth: 1.5,
+    borderColor: BuddyTheme.colors.border,
   },
   heroTitle: {
-    fontSize: 28,
+    fontSize: 26,
     fontWeight: 'bold',
-    color: '#F8FAFC',
-    marginBottom: 12,
+    color: BuddyTheme.colors.primary,
+    marginBottom: 16,
     textAlign: 'center',
   },
   heroDescription: {
-    fontSize: 16,
-    color: '#94A3B8',
+    fontSize: 17,
+    color: BuddyTheme.colors.textSecondary,
     textAlign: 'center',
-    marginBottom: 40,
-    lineHeight: 24,
+    marginBottom: 48,
+    lineHeight: 26,
   },
   findButton: {
-    backgroundColor: '#3B82F6',
+    backgroundColor: BuddyTheme.colors.primary,
     flexDirection: 'row',
-    paddingHorizontal: 32,
-    paddingVertical: 18,
-    borderRadius: 20,
+    paddingVertical: 20,
+    borderRadius: BuddyTheme.borderRadius.lg,
     alignItems: 'center',
     gap: 12,
     width: '100%',
     justifyContent: 'center',
   },
-  buttonText: {
+  findButtonText: {
     color: '#FFFFFF',
     fontSize: 18,
     fontWeight: 'bold',
@@ -164,55 +170,74 @@ const styles = StyleSheet.create({
     gap: 20,
   },
   matchingText: {
-    color: '#F8FAFC',
+    color: BuddyTheme.colors.primary,
     fontSize: 20,
     fontWeight: '600',
   },
   matchingSubtext: {
-    color: '#64748B',
-    fontSize: 14,
+    color: BuddyTheme.colors.textSecondary,
+    fontSize: 15,
   },
   matchContent: {
     flex: 1,
     justifyContent: 'center',
-    padding: 24,
+    padding: 32,
   },
   matchCard: {
-    backgroundColor: '#1E293B',
-    padding: 32,
-    borderRadius: 32,
+    backgroundColor: BuddyTheme.colors.surface,
+    padding: 40,
+    borderRadius: BuddyTheme.borderRadius.xl,
     alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#334155',
+    borderWidth: 1.5,
+    borderColor: BuddyTheme.colors.secondary,
+    shadowColor: BuddyTheme.colors.secondary,
+    shadowOpacity: 0.1,
+    shadowRadius: 20,
+    elevation: 5,
+  },
+  matchLabel: {
+    fontSize: 12,
+    fontWeight: '800',
+    color: BuddyTheme.colors.secondary,
+    letterSpacing: 2,
+    marginBottom: 16,
   },
   matchTitle: {
     fontSize: 28,
     fontWeight: 'bold',
-    color: '#F8FAFC',
-    marginBottom: 8,
+    color: BuddyTheme.colors.primary,
+    marginBottom: 12,
+    textAlign: 'center',
   },
   matchSubtitle: {
     fontSize: 16,
-    color: '#94A3B8',
-    marginBottom: 24,
+    color: BuddyTheme.colors.textSecondary,
+    marginBottom: 32,
+    textAlign: 'center',
   },
   commonContainer: {
-    backgroundColor: 'rgba(59, 130, 246, 0.1)',
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 99,
-    marginBottom: 32,
+    backgroundColor: 'rgba(38, 166, 154, 0.08)',
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    borderRadius: BuddyTheme.borderRadius.md,
+    marginBottom: 40,
   },
   commonText: {
-    color: '#3B82F6',
-    fontWeight: '500',
+    color: BuddyTheme.colors.secondary,
+    fontWeight: '600',
+    fontSize: 15,
   },
   taskButton: {
-    backgroundColor: '#10B981',
-    paddingVertical: 16,
+    backgroundColor: BuddyTheme.colors.secondary,
+    paddingVertical: 20,
     paddingHorizontal: 32,
-    borderRadius: 16,
+    borderRadius: BuddyTheme.borderRadius.lg,
     width: '100%',
     alignItems: 'center',
+  },
+  buttonText: {
+    color: '#FFF',
+    fontSize: 18,
+    fontWeight: 'bold',
   },
 });
