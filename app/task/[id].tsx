@@ -1,16 +1,20 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { CheckCircle2, LogOut, MessageSquare, Mic, Plus, Send, Smile, User } from 'lucide-react-native';
+import { CheckCircle2, GripVertical, LogOut, MessageSquare, Mic, Plus, Send, Smile, User } from 'lucide-react-native';
 import React, { useState } from 'react';
 import { FlatList, KeyboardAvoidingView, Modal, Platform, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import DraggableFlatList, { RenderItemParams, ScaleDecorator } from 'react-native-draggable-flatlist';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import Animated, { FadeInRight, SlideInDown, ZoomIn } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { BuddyTheme } from '../../constants/BuddyTheme';
+import taskData from '../../task.json';
 
 interface TaskItem {
     id: string;
     text: string;
     addedBy: 'me' | 'partner';
     timestamp: string;
+    selected?: boolean;
 }
 
 interface Message {
@@ -20,15 +24,29 @@ interface Message {
 }
 
 export default function TaskScreen() {
-    const { id } = useLocalSearchParams();
+    const { id, count, level } = useLocalSearchParams();
     const router = useRouter();
-    const [items, setItems] = useState<TaskItem[]>([
-        { id: '1', text: 'Distributed systems in mobile architecture', addedBy: 'partner', timestamp: '2m ago' }
-    ]);
+
+    const currentTask = taskData.tasks.find(t => t.id.toString() === id);
+    const currentLevel = parseInt(level as string) || 1;
+
+    const [items, setItems] = useState<TaskItem[]>(() => {
+        if (!currentTask?.options) {
+            return [{ id: '1', text: 'Initial shared thought...', addedBy: 'partner', timestamp: '2m ago' }];
+        }
+
+        // For binary tasks, we don't flat map yet, we keep them as pairs for the row-based UI
+        return currentTask.options.map((option: any, index: number) => ({
+            id: (index + 1).toString(),
+            text: option,
+            addedBy: 'partner', // Placeholder
+            timestamp: `Phase ${index + 1}`
+        }));
+    });
     const [inputText, setInputText] = useState('');
 
     // Progression State
-    const [taskCount, setTaskCount] = useState(1);
+    const [taskCount, setTaskCount] = useState(parseInt(count as string) || 1);
     const [isDone, setIsDone] = useState(false);
     const [showChat, setShowChat] = useState(false);
     const [showReveal, setShowReveal] = useState(false);
@@ -36,9 +54,35 @@ export default function TaskScreen() {
     const [chatInput, setChatInput] = useState('');
     const [revealed, setRevealed] = useState(false);
 
-    const chatUnlocked = taskCount >= 2;
-    const voiceUnlocked = taskCount >= 4;
-    const revealPossible = taskCount >= 6;
+    // Score State
+    const [showScore, setShowScore] = useState(false);
+    const [score, setScore] = useState(0);
+
+    // Sync taskCount from params when they change
+    React.useEffect(() => {
+        if (count) setTaskCount(parseInt(count as string));
+    }, [count]);
+
+    // Reset items and state when ID changes (new task in session)
+    React.useEffect(() => {
+        if (currentTask) {
+            const initialItems: TaskItem[] = currentTask.options?.map((option: any, index: number) => ({
+                id: (index + 1).toString(),
+                text: option,
+                addedBy: 'partner' as const,
+                timestamp: `Item ${index + 1}`
+            })) || [];
+            setItems(initialItems);
+            setBinarySelections({});
+            setIsDone(false);
+        }
+    }, [id]);
+
+    const chatUnlocked = currentLevel >= 2;
+    const voiceUnlocked = currentLevel >= 3;
+    const revealPossible = currentLevel >= 4;
+
+    const isNoTypingTask = ['ranking', 'selection', 'binary', 'sorting', 'puzzle'].includes(currentTask?.type || '');
 
     const addItem = () => {
         if (!inputText.trim()) return;
@@ -54,20 +98,67 @@ export default function TaskScreen() {
     const completeTask = () => {
         setIsDone(true);
         setTimeout(() => {
-            const nextCount = taskCount + 1;
-            setTaskCount(nextCount);
+            const baseScore = 75;
+            const randomAdd = Math.floor(Math.random() * 20);
+            setScore(baseScore + randomAdd);
+            setShowScore(true);
             setIsDone(false);
-            setItems([]);
-            if (nextCount === 6) {
+        }, 1200);
+    };
+
+    const proceedToNext = () => {
+        setShowScore(false);
+
+        if (taskCount < 4) {
+            // Pick next Level 1 task
+            const level1Tasks = taskData.tasks.filter(t => t.level === 1 && t.id.toString() !== id);
+            const nextId = level1Tasks[Math.floor(Math.random() * level1Tasks.length)].id;
+
+            router.replace({
+                pathname: '/task/[id]',
+                params: { id: nextId.toString(), count: (taskCount + 1).toString(), level: currentLevel.toString() }
+            });
+        } else if (currentLevel === 1) {
+            // Transition to Level 2
+            const level2Tasks = taskData.tasks.filter(t => t.level === 2);
+            const nextId = level2Tasks[Math.floor(Math.random() * level2Tasks.length)].id;
+
+            router.replace({
+                pathname: '/task/[id]',
+                params: { id: nextId.toString(), count: '1', level: '2' }
+            });
+        } else {
+            // Level 2 sequence or reveal
+            setTaskCount(prev => prev + 1);
+            if (taskCount >= 4) {
                 setShowReveal(true);
             }
-        }, 1200);
+        }
     };
 
     const sendMessage = () => {
         if (!chatInput.trim()) return;
         setMessages([...messages, { id: Date.now().toString(), text: chatInput, sender: 'me' }]);
         setChatInput('');
+    };
+
+    const [binarySelections, setBinarySelections] = useState<Record<string, string>>({});
+
+    const toggleBinarySelection = (itemId: string, choice: string) => {
+        setBinarySelections(prev => ({
+            ...prev,
+            [itemId]: choice
+        }));
+    };
+
+    const toggleItemSelection = (itemId: string) => {
+        if (!['selection', 'binary', 'vote'].includes(currentTask?.type || '')) return;
+
+        setItems(prev => prev.map(item =>
+            item.id === itemId
+                ? { ...item, selected: !item.selected }
+                : item
+        ));
     };
 
     const partnerName = revealed ? 'Alex Chen' : 'Participant #17';
@@ -81,75 +172,147 @@ export default function TaskScreen() {
                 <View style={styles.header}>
                     <View>
                         <Text style={styles.taskTitle}>
-                            {taskCount === 1 ? 'Architecture Analysis' : taskCount < 4 ? 'Strategic Planning' : 'Problem Solving'}
+                            {currentTask ? currentTask.title : 'Active Collaboration'}
                         </Text>
                         <Text style={styles.taskSubtitle}>
-                            Phase {taskCount} • Session with {partnerName}
+                            {currentTask ? `${currentTask.interest} • ${currentTask.duration}` : `Task ${taskCount}/4 • Level ${currentLevel}`}
                         </Text>
+                        <Text style={styles.levelBadge}>Level {currentLevel} • Task {taskCount}/4</Text>
                     </View>
-                    <TouchableOpacity activeOpacity={0.7} style={styles.leaveButton} onPress={() => router.back()}>
+                    <TouchableOpacity
+                        activeOpacity={0.7}
+                        style={styles.leaveButton}
+                        onPress={() => router.canGoBack() ? router.back() : router.replace('/(tabs)')}
+                    >
                         <LogOut size={22} color={BuddyTheme.colors.textSecondary} />
                     </TouchableOpacity>
                 </View>
 
                 <View style={styles.descriptionBox}>
                     <Text style={styles.descriptionText}>
-                        {taskCount === 1
-                            ? 'Iteratively build a list of core principles for scalable mobile architecture.'
-                            : taskCount < 4
-                                ? 'Review the proposed strategies and identify the top 3 highest impact items.'
-                                : 'Identify the logical architectural flaw in the provided system diagram.'}
+                        {currentTask ? currentTask.description : 'Collaborate with your partner to complete this task and unlock deeper levels of connection.'}
                     </Text>
                 </View>
 
-                <FlatList
-                    data={items}
-                    keyExtractor={(item) => item.id}
-                    contentContainerStyle={styles.listContent}
-                    renderItem={({ item }) => (
-                        <Animated.View
-                            entering={FadeInRight}
-                            style={[
-                                styles.itemCard,
-                                item.addedBy === 'partner' && styles.partnerItem
-                            ]}
-                        >
-                            <View style={styles.itemHeader}>
-                                <Text style={styles.itemAuthor}>
-                                    {item.addedBy === 'me' ? 'You' : partnerName}
-                                </Text>
-                                <Text style={styles.itemTime}>{item.timestamp}</Text>
-                            </View>
-                            <Text style={styles.itemText}>{item.text}</Text>
-                        </Animated.View>
-                    )}
-                />
-
-                <View style={styles.inputArea}>
-                    <View style={styles.inputRow}>
-                        <TextInput
-                            style={styles.input}
-                            placeholder="Add your input..."
-                            placeholderTextColor={BuddyTheme.colors.textSecondary}
-                            value={inputText}
-                            onChangeText={setInputText}
+                <GestureHandlerRootView style={{ flex: 1 }}>
+                    {currentTask?.type === 'ranking' ? (
+                        <DraggableFlatList
+                            data={items}
+                            onDragEnd={({ data }) => setItems(data)}
+                            keyExtractor={(item) => item.id}
+                            contentContainerStyle={styles.listContent}
+                            renderItem={({ item, drag, isActive, getIndex }: RenderItemParams<TaskItem>) => (
+                                <ScaleDecorator>
+                                    <TouchableOpacity
+                                        onLongPress={drag}
+                                        disabled={isActive}
+                                        style={[
+                                            styles.itemCard,
+                                            item.addedBy === 'partner' && styles.partnerItem,
+                                            isActive && { backgroundColor: BuddyTheme.colors.surface, elevation: 10, zIndex: 100 }
+                                        ]}
+                                    >
+                                        <View style={styles.itemHeader}>
+                                            <View style={styles.authorRow}>
+                                                <GripVertical size={20} color={BuddyTheme.colors.secondary} style={{ marginRight: 12 }} />
+                                                <View style={styles.rankBadge}>
+                                                    <Text style={styles.rankText}>
+                                                        {getIndex() === 0 ? '1st' : getIndex() === 1 ? '2nd' : getIndex() === 2 ? '3rd' : `${getIndex()! + 1}th`}
+                                                    </Text>
+                                                </View>
+                                                <Text style={[styles.itemText, isActive && styles.selectedText]}>{item.text}</Text>
+                                            </View>
+                                        </View>
+                                    </TouchableOpacity>
+                                </ScaleDecorator>
+                            )}
                         />
-                        <TouchableOpacity style={styles.addButton} onPress={addItem} activeOpacity={0.8}>
-                            <Plus size={24} color="#FFF" />
-                        </TouchableOpacity>
-                    </View>
+                    ) : currentTask?.type === 'binary' ? (
+                        <FlatList
+                            data={items}
+                            keyExtractor={(item) => item.id}
+                            contentContainerStyle={styles.listContent}
+                            renderItem={({ item }) => {
+                                const parts = item.text.split(/ vs | or | \/ /i);
+                                return (
+                                    <View style={styles.binaryRow}>
+                                        {parts.map((choice, i) => (
+                                            <TouchableOpacity
+                                                key={i}
+                                                style={[
+                                                    styles.binaryButton,
+                                                    binarySelections[item.id] === choice && styles.binarySelected
+                                                ]}
+                                                onPress={() => toggleBinarySelection(item.id, choice)}
+                                                activeOpacity={0.7}
+                                            >
+                                                <Text style={[
+                                                    styles.binaryText,
+                                                    binarySelections[item.id] === choice && styles.binarySelectedText
+                                                ]}>{choice}</Text>
+                                            </TouchableOpacity>
+                                        ))}
+                                    </View>
+                                );
+                            }}
+                        />
+                    ) : (
+                        <FlatList
+                            data={items}
+                            keyExtractor={(item) => item.id}
+                            contentContainerStyle={styles.listContent}
+                            renderItem={({ item }) => (
+                                <TouchableOpacity
+                                    activeOpacity={0.8}
+                                    onPress={() => toggleItemSelection(item.id)}
+                                >
+                                    <Animated.View
+                                        entering={FadeInRight}
+                                        style={[
+                                            styles.itemCard,
+                                            item.selected && styles.selectedItem
+                                        ]}
+                                    >
+                                        <View style={styles.itemHeader}>
+                                            <Text style={[styles.itemText, item.selected && styles.selectedText]}>{item.text}</Text>
+                                            {item.selected && <CheckCircle2 size={18} color={BuddyTheme.colors.secondary} />}
+                                        </View>
+                                    </Animated.View>
+                                </TouchableOpacity>
+                            )}
+                        />
+                    )}
+                </GestureHandlerRootView>
 
+                {!isNoTypingTask && (
+                    <View style={styles.inputArea}>
+                        <View style={styles.inputRow}>
+                            <TextInput
+                                style={styles.input}
+                                placeholder="Add your input..."
+                                placeholderTextColor={BuddyTheme.colors.textSecondary}
+                                value={inputText}
+                                onChangeText={setInputText}
+                            />
+                            <TouchableOpacity style={styles.addButton} onPress={addItem} activeOpacity={0.8}>
+                                <Plus size={24} color="#FFF" />
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                )}
+
+                <View style={styles.bottomBar}>
                     <View style={styles.footerActions}>
-                        <TouchableOpacity
-                            style={[styles.chatButton, !chatUnlocked && styles.chatLocked]}
-                            onPress={() => chatUnlocked && setShowChat(true)}
-                            activeOpacity={0.7}
-                        >
-                            <MessageSquare size={20} color={chatUnlocked ? BuddyTheme.colors.primary : "#94A3B8"} />
-                            <Text style={[styles.chatButtonText, !chatUnlocked && styles.lockedText]}>
-                                {chatUnlocked ? 'Quick Chat' : 'Chat Restricted'}
-                            </Text>
-                        </TouchableOpacity>
+                        {chatUnlocked && (
+                            <TouchableOpacity
+                                style={[styles.chatButton]}
+                                onPress={() => setShowChat(true)}
+                                activeOpacity={0.7}
+                            >
+                                <MessageSquare size={20} color={BuddyTheme.colors.primary} />
+                                <Text style={[styles.chatButtonText]}>Quick Chat</Text>
+                            </TouchableOpacity>
+                        )}
 
                         {voiceUnlocked && (
                             <TouchableOpacity style={styles.voiceButton} activeOpacity={0.8}>
@@ -158,12 +321,16 @@ export default function TaskScreen() {
                         )}
 
                         <TouchableOpacity
-                            style={[styles.doneButton, (items.length < 1 && !isDone) && styles.doneDisabled]}
+                            style={[
+                                styles.doneButton,
+                                (!isDone && currentTask?.type !== 'ranking' && items.length < 1) && styles.doneDisabled,
+                                !chatUnlocked && { flex: 1, justifyContent: 'center' }
+                            ]}
                             onPress={completeTask}
-                            disabled={items.length < 1 || isDone}
+                            disabled={(currentTask?.type !== 'ranking' && items.length < 1) || isDone}
                             activeOpacity={0.8}
                         >
-                            <Text style={styles.doneText}>{isDone ? 'Syncing...' : "Finish Phase"}</Text>
+                            <Text style={styles.doneText}>{isDone ? 'Syncing...' : isNoTypingTask ? "Complete Selection" : "Finish Phase"}</Text>
                             <CheckCircle2 size={18} color="#FFF" />
                         </TouchableOpacity>
                     </View>
@@ -254,6 +421,44 @@ export default function TaskScreen() {
                         </Animated.View>
                     </View>
                 </Modal>
+
+                {/* Compatibility Score Modal */}
+                <Modal
+                    visible={showScore}
+                    animationType="fade"
+                    transparent={true}
+                >
+                    <View style={styles.scoreOverlay}>
+                        <Animated.View entering={ZoomIn.duration(600)} style={styles.scoreContent}>
+                            <View style={styles.sharedBadge}>
+                                <Text style={styles.sharedBadgeText}>VISIBLE TO BOTH</Text>
+                            </View>
+
+                            <Text style={styles.scoreLabel}>Phase {taskCount} Compatibility</Text>
+
+                            <View style={styles.scoreCircle}>
+                                <Text style={styles.scoreValue}>{score}%</Text>
+                                <Text style={styles.scoreSubtext}>Sync Rate</Text>
+                            </View>
+
+                            <Text style={styles.scoreMessage}>
+                                {score > 90
+                                    ? "Perfect wavelength! You both think remarkably alike."
+                                    : score > 85
+                                        ? "Strong alignment detected. Great collaboration!"
+                                        : "You're building a unique synergy together."}
+                            </Text>
+
+                            <TouchableOpacity
+                                style={styles.continueButton}
+                                onPress={proceedToNext}
+                                activeOpacity={0.8}
+                            >
+                                <Text style={styles.continueButtonText}>Continue to Phase {taskCount + 1}</Text>
+                            </TouchableOpacity>
+                        </Animated.View>
+                    </View>
+                </Modal>
             </KeyboardAvoidingView>
         </SafeAreaView>
     );
@@ -276,10 +481,18 @@ const styles = StyleSheet.create({
         color: BuddyTheme.colors.primary,
     },
     taskSubtitle: {
-        fontSize: 15,
+        fontSize: 14,
         color: BuddyTheme.colors.textSecondary,
-        marginTop: 4,
+        marginTop: 2,
         fontWeight: '500',
+    },
+    levelBadge: {
+        fontSize: 12,
+        fontWeight: '900',
+        color: BuddyTheme.colors.secondary,
+        textTransform: 'uppercase',
+        letterSpacing: 1,
+        marginTop: 4,
     },
     leaveButton: {
         padding: 8,
@@ -320,22 +533,69 @@ const styles = StyleSheet.create({
     itemHeader: {
         flexDirection: 'row',
         justifyContent: 'space-between',
-        marginBottom: 8,
-    },
-    itemAuthor: {
-        fontSize: 13,
-        fontWeight: '800',
-        color: BuddyTheme.colors.textSecondary,
-        letterSpacing: 0.5,
-    },
-    itemTime: {
-        fontSize: 11,
-        color: BuddyTheme.colors.textSecondary,
+        alignItems: 'center',
     },
     itemText: {
         color: BuddyTheme.colors.textPrimary,
         fontSize: 16,
         lineHeight: 24,
+    },
+    selectedItem: {
+        borderColor: BuddyTheme.colors.secondary,
+        backgroundColor: BuddyTheme.colors.secondary + '05',
+        borderLeftWidth: 10,
+    },
+    selectedText: {
+        fontWeight: '700',
+        color: BuddyTheme.colors.primary,
+    },
+    rankBadge: {
+        backgroundColor: BuddyTheme.colors.primary + '15',
+        paddingHorizontal: 8,
+        paddingVertical: 4,
+        borderRadius: 8,
+        marginRight: 10,
+        minWidth: 40,
+        alignItems: 'center',
+    },
+    rankText: {
+        color: BuddyTheme.colors.primary,
+        fontSize: 12,
+        fontWeight: '900',
+        textTransform: 'uppercase',
+    },
+    binaryRow: {
+        flexDirection: 'row',
+        gap: 12,
+        marginBottom: 8,
+    },
+    binaryButton: {
+        flex: 1,
+        backgroundColor: BuddyTheme.colors.surface,
+        paddingVertical: 24,
+        paddingHorizontal: 16,
+        borderRadius: 20,
+        alignItems: 'center',
+        justifyContent: 'center',
+        borderWidth: 2,
+        borderColor: BuddyTheme.colors.border,
+        shadowColor: '#000',
+        shadowOpacity: 0.03,
+        shadowRadius: 10,
+        elevation: 1,
+    },
+    binarySelected: {
+        borderColor: BuddyTheme.colors.secondary,
+        backgroundColor: BuddyTheme.colors.secondary + '10',
+    },
+    binaryText: {
+        fontSize: 16,
+        fontWeight: '700',
+        color: BuddyTheme.colors.textPrimary,
+        textAlign: 'center',
+    },
+    binarySelectedText: {
+        color: BuddyTheme.colors.primary,
     },
     inputArea: {
         padding: 32,
@@ -366,6 +626,16 @@ const styles = StyleSheet.create({
         borderRadius: 14,
         alignItems: 'center',
         justifyContent: 'center',
+    },
+    authorRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    bottomBar: {
+        padding: 32,
+        backgroundColor: BuddyTheme.colors.surface,
+        borderTopWidth: 1.5,
+        borderTopColor: BuddyTheme.colors.border,
     },
     footerActions: {
         flexDirection: 'row',
@@ -559,5 +829,83 @@ const styles = StyleSheet.create({
         color: BuddyTheme.colors.textSecondary,
         fontSize: 15,
         fontWeight: '600',
+    },
+    scoreOverlay: {
+        flex: 1,
+        backgroundColor: 'rgba(15, 23, 42, 0.9)',
+        justifyContent: 'center',
+        alignItems: 'center',
+        padding: 32,
+    },
+    scoreContent: {
+        backgroundColor: BuddyTheme.colors.surface,
+        borderRadius: 40,
+        padding: 40,
+        width: '100%',
+        alignItems: 'center',
+        borderWidth: 2,
+        borderColor: BuddyTheme.colors.accent + '30',
+    },
+    sharedBadge: {
+        backgroundColor: BuddyTheme.colors.secondary + '15',
+        paddingHorizontal: 12,
+        paddingVertical: 6,
+        borderRadius: 12,
+        marginBottom: 24,
+    },
+    sharedBadgeText: {
+        color: BuddyTheme.colors.secondary,
+        fontSize: 10,
+        fontWeight: '900',
+        letterSpacing: 1,
+    },
+    scoreLabel: {
+        fontSize: 18,
+        fontWeight: '700',
+        color: BuddyTheme.colors.textSecondary,
+        marginBottom: 32,
+    },
+    scoreCircle: {
+        width: 180,
+        height: 180,
+        borderRadius: 90,
+        borderWidth: 8,
+        borderColor: BuddyTheme.colors.accent,
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginBottom: 32,
+        backgroundColor: BuddyTheme.colors.accent + '05',
+    },
+    scoreValue: {
+        fontSize: 48,
+        fontWeight: '900',
+        color: BuddyTheme.colors.primary,
+    },
+    scoreSubtext: {
+        fontSize: 14,
+        fontWeight: '700',
+        color: BuddyTheme.colors.textSecondary,
+        textTransform: 'uppercase',
+        letterSpacing: 1,
+    },
+    scoreMessage: {
+        fontSize: 17,
+        color: BuddyTheme.colors.textPrimary,
+        textAlign: 'center',
+        lineHeight: 26,
+        marginBottom: 40,
+        paddingHorizontal: 10,
+    },
+    continueButton: {
+        backgroundColor: BuddyTheme.colors.primary,
+        width: '100%',
+        paddingVertical: 20,
+        borderRadius: 20,
+        alignItems: 'center',
+    },
+    continueButtonText: {
+        color: '#FFF',
+        fontSize: 18,
+        fontWeight: '800',
     },
 });
