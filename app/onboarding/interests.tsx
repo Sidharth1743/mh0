@@ -59,7 +59,10 @@ export default function InterestsScreen() {
 
     return (
         <SafeAreaView style={styles.container}>
-            <View style={styles.content}>
+            <ScrollView
+                showsVerticalScrollIndicator={false}
+                contentContainerStyle={styles.content}
+            >
                 <Animated.View entering={FadeInDown.delay(200)} style={styles.header}>
                     <Text style={styles.title}>What Gets You Going?</Text>
                     <Text style={styles.subtitle}>
@@ -67,7 +70,7 @@ export default function InterestsScreen() {
                     </Text>
                 </Animated.View>
 
-                <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.grid}>
+                <View style={styles.grid}>
                     {INTERESTS.map((interest, index) => (
                         <Animated.View
                             key={interest.label}
@@ -95,7 +98,7 @@ export default function InterestsScreen() {
                             </TouchableOpacity>
                         </Animated.View>
                     ))}
-                </ScrollView>
+                </View>
 
                 {activeTeaser && (
                     <Animated.View entering={FadeInUp} style={styles.teaserPopup}>
@@ -133,7 +136,7 @@ export default function InterestsScreen() {
                         </TouchableOpacity>
                     </Animated.View>
                 </View>
-            </View>
+            </ScrollView>
         </SafeAreaView>
     );
 }
@@ -144,7 +147,7 @@ const styles = StyleSheet.create({
         backgroundColor: BuddyTheme.colors.background,
     },
     content: {
-        flex: 1,
+        flexGrow: 1,
         padding: 32,
     },
     header: {

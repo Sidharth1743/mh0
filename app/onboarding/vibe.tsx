@@ -2,7 +2,7 @@ import * as Haptics from 'expo-haptics';
 import { useRouter } from 'expo-router';
 import { Activity, Wind, Zap } from 'lucide-react-native';
 import React, { useState } from 'react';
-import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import Animated, {
     FadeInDown,
     FadeInUp,
@@ -50,7 +50,10 @@ export default function VibeScreen() {
 
     return (
         <SafeAreaView style={styles.container}>
-            <View style={styles.content}>
+            <ScrollView
+                showsVerticalScrollIndicator={false}
+                contentContainerStyle={styles.content}
+            >
                 <Animated.View entering={FadeInDown.delay(200)} style={styles.header}>
                     <Text style={styles.title}>Match Your Energy</Text>
                     <Text style={styles.subtitle}>
@@ -121,7 +124,7 @@ export default function VibeScreen() {
                         </TouchableOpacity>
                     </Animated.View>
                 </View>
-            </View>
+            </ScrollView>
         </SafeAreaView>
     );
 }
@@ -132,7 +135,7 @@ const styles = StyleSheet.create({
         backgroundColor: BuddyTheme.colors.background,
     },
     content: {
-        flex: 1,
+        flexGrow: 1,
         padding: 32,
     },
     header: {
