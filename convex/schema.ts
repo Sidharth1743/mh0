@@ -10,7 +10,9 @@ export default defineSchema({
     trustLevel: v.number(), // 1, 2, 3, 4
     deviceId: v.string(), // For anonymous auth
     isMatching: v.boolean(),
+    supabaseUid: v.optional(v.string()),
   }).index("by_deviceId", ["deviceId"])
+    .index("by_supabaseUid", ["supabaseUid"])
     .index("by_matching", ["isMatching", "energyLevel", "availability"]),
 
   matches: defineTable({
@@ -18,6 +20,7 @@ export default defineSchema({
     status: v.string(), // "active", "completed", "cancelled"
     activeTaskId: v.optional(v.id("tasks")),
     matchLevel: v.number(),
+    revealedUserIds: v.array(v.id("users")), // tracks who agreed to reveal
   }),
 
   tasks: defineTable({

@@ -1,5 +1,5 @@
 import { v } from "convex/values";
-import { mutation } from "./_generated/server";
+import { mutation, query } from "./_generated/server";
 
 export const getOrCreateUser = mutation({
     args: { deviceId: v.string(), nickname: v.string() },
@@ -61,6 +61,7 @@ export const findMatch = mutation({
                 userIds: [args.userId, potential._id],
                 status: "active",
                 matchLevel: 1,
+                revealedUserIds: [], // Added for new schema
             });
 
             // Update users
@@ -70,5 +71,94 @@ export const findMatch = mutation({
             return matchId;
         }
         return null;
+    },
+});
+
+export const linkSupabaseAccount = mutation({
+    args: { userId: v.id("users"), supabaseUid: v.string() },
+    handler: async (ctx, args) => {
+        await ctx.db.patch(args.userId, { supabaseUid: args.supabaseUid });
+    },
+});
+
+export const getMatch = query({
+    args: { matchId: v.id("matches") },
+    handler: async (ctx, args) => {
+        return await ctx.db.get(args.matchId);
+    },
+});
+
+export const toggleReveal = mutation({
+    args: { matchId: v.id("matches"), userId: v.id("users") },
+    handler: async (ctx, args) => {
+        const match = await ctx.db.get(args.matchId);
+        if (!match) throw new Error("Match not found");
+
+        const revealed = match.revealedUserIds || [];
+        if (revealed.includes(args.userId)) {
+            // Un-reveal
+            await ctx.db.patch(args.matchId, {
+                revealedUserIds: revealed.filter(id => id !== args.userId)
+            });
+        } else {
+            // Reveal
+            await ctx.db.patch(args.matchId, {
+                revealedUserIds: [...revealed, args.userId]
+            });
+        }
+    },
+});
+
+export const getMyMatch = query({
+    args: { userId: v.id("users") },
+    handler: async (ctx, args) => {
+        const match = await ctx.db
+            .query("matches")
+            .filter((q) => q.eq(q.field("status"), "active"))
+            .collect();
+
+        // Filter in memory for simplicity (or add index later if needed)
+        const myMatch = match.find(m => m.userIds.includes(args.userId));
+        return myMatch ? myMatch._id : null;
+    },
+});
+
+export const leaveMatch = mutation({
+    args: { matchId: v.id("matches"), userId: v.id("users") },
+    handler: async (ctx, args) => {
+        const match = await ctx.db.get(args.matchId);
+        if (!match) return; // Already gone
+
+        // Mark match as ended so it stops showing up
+        await ctx.db.patch(args.matchId, { status: "ended" });
+    },
+});
+
+export const cancelAllActiveMatches = mutation({
+    args: { userId: v.id("users") },
+    handler: async (ctx, args) => {
+        const matches = await ctx.db
+            .query("matches")
+            .filter((q) => q.eq(q.field("status"), "active"))
+            .collect();
+
+        const myMatches = matches.filter(m => m.userIds.includes(args.userId));
+
+        for (const m of myMatches) {
+            await ctx.db.patch(m._id, { status: "ended" });
+        }
+    },
+});
+
+export const getOnlineUsers = query({
+    args: {},
+    handler: async (ctx) => {
+        // Count users who are currently looking for a match
+        const matchingUsers = await ctx.db
+            .query("users")
+            .withIndex("by_matching", (q) => q.eq("isMatching", true))
+            .collect();
+
+        return matchingUsers.length;
     },
 });

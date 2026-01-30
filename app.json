@@ -21,8 +21,13 @@
         {
           "experimentalLauncherActivity": false
         }
-      ]
+      ],
+      "expo-router",
+      "expo-audio"
     ],
+    "experiments": {
+      "typedRoutes": true
+    },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",

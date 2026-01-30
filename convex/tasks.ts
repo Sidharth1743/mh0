@@ -22,13 +22,19 @@ export const getMessages = query({
 });
 
 export const sendMessage = mutation({
-    args: { matchId: v.id("matches"), senderId: v.id("users"), text: v.string() },
+    args: {
+        matchId: v.id("matches"),
+        senderId: v.id("users"),
+        text: v.string(),
+        type: v.optional(v.string()) // "text" or "voice"
+    },
     handler: async (ctx, args) => {
+        console.log(`[SERVER] Sending message in match ${args.matchId} from ${args.senderId}`);
         await ctx.db.insert("messages", {
             matchId: args.matchId,
             senderId: args.senderId,
             text: args.text,
-            type: "text",
+            type: args.type || "text",
             createdAt: Date.now(),
         });
     },
@@ -37,6 +43,7 @@ export const sendMessage = mutation({
 export const addTaskItem = mutation({
     args: { matchId: v.id("matches"), text: v.string(), userId: v.id("users") },
     handler: async (ctx, args) => {
+        console.log(`[SERVER] Adding task item '${args.text}' to match ${args.matchId}`);
         let task = await ctx.db
             .query("tasks")
             .withIndex("by_match", (q) => q.eq("matchId", args.matchId))
@@ -63,7 +70,7 @@ export const addTaskItem = mutation({
                         id: Date.now().toString(),
                         text: args.text,
                         userId: args.userId,
-                        timestamp: "Just now"
+                        timestamp: Date.now()
                     }]
                 }
             });
@@ -74,6 +81,7 @@ export const addTaskItem = mutation({
 export const completePhase = mutation({
     args: { matchId: v.id("matches"), userId: v.id("users") },
     handler: async (ctx, args) => {
+        console.log(`[SERVER] Completing phase for match ${args.matchId}`);
         const match = await ctx.db.get(args.matchId);
         if (!match) throw new Error("Match not found");
 
