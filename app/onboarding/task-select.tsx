@@ -70,7 +70,10 @@ export default function TaskSelectScreen() {
 
     return (
         <SafeAreaView style={styles.container}>
-            <ScrollView contentContainerStyle={styles.scrollContent}>
+            <ScrollView
+                showsVerticalScrollIndicator={false}
+                contentContainerStyle={styles.scrollContent}
+            >
                 <Animated.View entering={FadeInDown.delay(200)} style={styles.header}>
                     <View style={styles.badge}>
                         <Zap size={14} color={BuddyTheme.colors.secondary} fill={BuddyTheme.colors.secondary} />

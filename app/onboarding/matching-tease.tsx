@@ -1,7 +1,7 @@
 import * as Haptics from 'expo-haptics';
 import { useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import Animated, {
     FadeInUp,
     ZoomIn,
@@ -71,7 +71,10 @@ export default function MatchingTeaseScreen() {
 
     return (
         <SafeAreaView style={styles.container}>
-            <View style={styles.content}>
+            <ScrollView
+                showsVerticalScrollIndicator={false}
+                contentContainerStyle={styles.content}
+            >
                 {!complete ? (
                     <Animated.View style={[styles.loaderWrapper, animatedStyle]}>
                         <View style={styles.circle}>
@@ -111,7 +114,7 @@ export default function MatchingTeaseScreen() {
                         </TouchableOpacity>
                     </Animated.View>
                 )}
-            </View>
+            </ScrollView>
         </SafeAreaView>
     );
 }
@@ -122,7 +125,7 @@ const styles = StyleSheet.create({
         backgroundColor: BuddyTheme.colors.background,
     },
     content: {
-        flex: 1,
+        flexGrow: 1,
         padding: 40,
         justifyContent: 'center',
         alignItems: 'center',
