@@ -9,6 +9,7 @@ export default function OnboardingLayout() {
             <Stack.Screen name="vibe" />
             <Stack.Screen name="availability" />
             <Stack.Screen name="matching-tease" />
+            <Stack.Screen name="task-select" />
         </Stack>
     );
 }

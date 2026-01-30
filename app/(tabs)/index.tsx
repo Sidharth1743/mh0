@@ -35,9 +35,9 @@ export default function TabOneScreen() {
             <TouchableOpacity
               activeOpacity={0.8}
               style={styles.taskButton}
-              onPress={() => router.push('/task/123')}
+              onPress={() => router.push('/task/101')}
             >
-              <Text style={styles.buttonText}>Initialize Layer 1 Task</Text>
+              <Text style={styles.buttonText}>Collaborate on Level 1 Task</Text>
             </TouchableOpacity>
           </Animated.View>
         </View>
