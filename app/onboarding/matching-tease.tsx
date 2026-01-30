@@ -45,8 +45,18 @@ export default function MatchingTeaseScreen() {
         }, 1500);
 
         const timer = setTimeout(() => {
+            const level1Tasks = [101, 102, 103, 104, 105, 106, 107, 108];
+            const randomId = level1Tasks[Math.floor(Math.random() * level1Tasks.length)];
             setComplete(true);
             Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+
+            // Auto-redirect to random task after brief success state
+            setTimeout(() => {
+                router.replace({
+                    pathname: '/task/[id]',
+                    params: { id: randomId.toString(), count: '1', level: '1' }
+                });
+            }, 2000);
         }, 4500);
 
         return () => {
@@ -87,10 +97,17 @@ export default function MatchingTeaseScreen() {
 
                         <TouchableOpacity
                             style={styles.button}
-                            onPress={() => router.replace('/(tabs)')}
+                            onPress={() => {
+                                const level1Tasks = [101, 102, 103, 104, 105, 106, 107, 108];
+                                const randomId = level1Tasks[Math.floor(Math.random() * level1Tasks.length)];
+                                router.replace({
+                                    pathname: '/task/[id]',
+                                    params: { id: randomId.toString(), count: '1', level: '1' }
+                                });
+                            }}
                             activeOpacity={0.8}
                         >
-                            <Text style={styles.buttonText}>Jump Into First Task</Text>
+                            <Text style={styles.buttonText}>Initializing First Collab...</Text>
                         </TouchableOpacity>
                     </Animated.View>
                 )}
