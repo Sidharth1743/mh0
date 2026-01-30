@@ -98,6 +98,13 @@
             "description": "Manipulate a shared node graph together to untangle the mess. Pure cooperation.",
             "steps": 1,
             "type": "puzzle",
+            "options": [
+                "Root Node",
+                "Branch Alpha",
+                "Branch Beta",
+                "Leaf Gamma",
+                "Leaf Delta"
+            ],
             "completion": "No overlapping nodes + Success",
             "whyEngaging": "Immediate team feeling, no social comparison"
         },
@@ -265,41 +272,160 @@
         {
             "id": 6,
             "level": 2,
-            "interest": "music",
+            "interest": "culture",
             "energy": "medium",
-            "duration": "20 min",
-            "title": "Playlist Reasons",
-            "description": "Build a 6-song playlist; after each add, write one short line why (optional emoji only if typing feels much).",
-            "steps": 6,
-            "type": "build",
-            "completion": "Playlist + reasons (or skips) + Done",
-            "whyEngaging": "First taste of personality without deep sharing"
+            "duration": "5 min",
+            "title": "Hot Take Showdown",
+            "description": "5 rapid-fire controversial takes. No middle ground—mostly.",
+            "steps": 5,
+            "type": "showdown",
+            "showdownButtons": [
+                {
+                    "label": "🔥 Hell Yes",
+                    "value": "yes"
+                },
+                {
+                    "label": "😐 Depends",
+                    "value": "depends"
+                },
+                {
+                    "label": "❌ No Way",
+                    "value": "no"
+                }
+            ],
+            "options": [
+                "Taylor Swift is overrated",
+                "Anime is just cartoons for adults",
+                "Marvel fatigue is real",
+                "Social media has made friendships worse",
+                "Hustle culture is mostly toxic"
+            ],
+            "completion": "Showdown complete + Delayed Reveal",
+            "whyEngaging": "Spicy takes reveal true character fast"
         },
         {
             "id": 7,
             "level": 2,
-            "interest": "gaming",
+            "interest": "lifestyle",
             "energy": "medium",
-            "duration": "20 min",
-            "title": "Game Feature Rank",
-            "description": "Rank 6 game features (e.g., open world, story) and add one-line why for your top pick.",
-            "steps": 6,
-            "type": "vote",
-            "completion": "Ranking + one reason each + Done",
-            "whyEngaging": "Shared opinions emerge naturally"
+            "duration": "5 min",
+            "title": "This or That",
+            "description": "Quick gut-check on 5 binary life preferences.",
+            "steps": 5,
+            "type": "showdown",
+            "options": [
+                "Coffee ☕ vs Tea 🍵",
+                "Mountains 🏔️ vs Beach 🏖️",
+                "Texting 📱 vs Calling 📞",
+                "Netflix 🍿 vs YouTube 📺",
+                "Stability 🏡 vs Adventure ✈️"
+            ],
+            "completion": "Preferences synced",
+            "whyEngaging": "Simple binary choices create instant alignment"
         },
         {
             "id": 8,
             "level": 2,
-            "interest": "movies",
+            "interest": "social",
             "energy": "medium",
-            "duration": "20 min",
-            "title": "Movie Quote Vote",
-            "description": "Vote on 6 iconic movie quotes; add one-line favorite scene memory (optional).",
-            "steps": 6,
-            "type": "vote",
-            "completion": "Votes + optional lines + Done",
-            "whyEngaging": "Nostalgia without personal depth"
+            "duration": "5 min",
+            "title": "Social Norms",
+            "description": "Spicy but safe questions about how you navigate the world.",
+            "steps": 5,
+            "type": "showdown",
+            "options": [
+                "Split the bill vs One person pays",
+                "Text back later vs Reply immediately",
+                "Cancel plans guilt-free vs Always show up",
+                "Separate lives vs Do everything together",
+                "Low expectations vs High standards"
+            ],
+            "completion": "Social profile built",
+            "whyEngaging": "Gray zone choices stimulate curiosity"
+        },
+        {
+            "id": 13,
+            "level": 2,
+            "interest": "society",
+            "energy": "medium",
+            "duration": "5 min",
+            "title": "Defend or Delete",
+            "description": "Which societal concepts stay, and which get deleted from history?",
+            "steps": 5,
+            "type": "showdown",
+            "showdownButtons": [
+                {
+                    "label": "🛡️ Defend",
+                    "value": "defend"
+                },
+                {
+                    "label": "🗑️ Delete",
+                    "value": "delete"
+                }
+            ],
+            "options": [
+                "Cancel culture has gone too far",
+                "AI will replace most jobs",
+                "Remote work makes people lonelier",
+                "Marriage is outdated",
+                "Social media breaks attention spans"
+            ],
+            "completion": "Future vision synced",
+            "whyEngaging": "High-stakes binary filtering"
+        },
+        {
+            "id": 16,
+            "level": 2,
+            "interest": "psychology",
+            "energy": "high",
+            "duration": "8 min",
+            "title": "High Dopamine Dilemmas",
+            "description": "Money, reputation, and the grey zones in between.",
+            "steps": 5,
+            "type": "showdown",
+            "options": [
+                "Win $1M (everyone thinks you cheated) vs Stay broke (respected)",
+                "Get $500k instantly vs Favorite celeb publicly dislikes you",
+                "Be rich anonymously vs Be famous for something mildly embarrassing",
+                "Paid to lie once vs Stay honest (lose big opportunity)",
+                "Protect someone you love (they're wrong) vs Call them out publicly"
+            ],
+            "completion": "Moral alignment revealed",
+            "whyEngaging": "Friction points create the best context for Level 3"
+        },
+        {
+            "id": 20,
+            "level": 2,
+            "interest": "connection",
+            "energy": "low",
+            "duration": "3 min",
+            "title": "Alignment Streak Finisher",
+            "description": "Final check before moving to persistent chat.",
+            "steps": 5,
+            "type": "showdown",
+            "showdownButtons": [
+                {
+                    "label": "👍 Yes",
+                    "value": "yes"
+                },
+                {
+                    "label": "👀 Maybe",
+                    "value": "maybe"
+                },
+                {
+                    "label": "❌ Nah",
+                    "value": "no"
+                }
+            ],
+            "options": [
+                "We’re on the same wavelength",
+                "I’d do another round with this group",
+                "Our opinions matched more than I expected",
+                "This felt surprisingly easy",
+                "I’m curious to see what we’d disagree on next"
+            ],
+            "completion": "Vibe check complete",
+            "whyEngaging": "Meta-reflection builds trust"
         },
         {
             "id": 9,
@@ -360,18 +486,6 @@
             "whyEngaging": "By level 4, sharing feels earned and safe"
         },
         {
-            "id": 13,
-            "level": 2,
-            "interest": "science",
-            "energy": "medium",
-            "duration": "20 min",
-            "title": "Fact Check Chain",
-            "description": "Alternate sharing a fun science fact; vote real or fake + one-line guess why.",
-            "steps": 6,
-            "type": "solve",
-            "completion": "6 facts + votes + Done"
-        },
-        {
             "id": 14,
             "level": 1,
             "interest": "movies",
@@ -403,19 +517,6 @@
             "completion": "Rewritten ending + Done"
         },
         {
-            "id": 16,
-            "level": 2,
-            "interest": "tech",
-            "energy": "medium",
-            "duration": "20 min",
-            "title": "App Idea Builder",
-            "description": "Build a concept for a simple 3-screen app. Take turns naming screens.",
-            "steps": 6,
-            "type": "build",
-            "completion": "App map complete + Done",
-            "whyEngaging": "Low-stakes creativity"
-        },
-        {
             "id": 17,
             "level": 1,
             "interest": "fitness",
@@ -425,6 +526,14 @@
             "description": "Pick 5 stretches for a quick relaxation session from a visual list.",
             "steps": 5,
             "type": "build",
+            "options": [
+                "Neck Rolls",
+                "Shoulder Shrugs",
+                "TouchToes",
+                "Cobra Stretch",
+                "Child's Pose",
+                "Hamstring Reach"
+            ],
             "completion": "Routine built + Done",
             "whyEngaging": "Easy and helpful"
         },
@@ -469,21 +578,8 @@
             "whyEngaging": "Visual tactile play"
         },
         {
-            "id": 20,
-            "level": 2,
-            "interest": "cooking",
-            "energy": "medium",
-            "duration": "20 min",
-            "title": "Secret Ingredient Swap",
-            "description": "Pick a classic dish; each player adds one 'secret' ingredient and one-line guess why it works.",
-            "steps": 6,
-            "type": "build",
-            "completion": "Recipe updated + Done",
-            "whyEngaging": "Fun culinary debate"
-        },
-        {
             "id": 21,
-            "level": 2,
+            "level": 3,
             "interest": "science",
             "energy": "medium",
             "duration": "20 min",
@@ -491,6 +587,12 @@
             "description": "Design a mission to a planet; alternate picking goals and name ideas.",
             "steps": 6,
             "type": "imagine",
+            "reflectionChips": [
+                "To the moon",
+                "Bold mission",
+                "Scientific",
+                "Dangerous"
+            ],
             "completion": "Mission brief complete + Done",
             "whyEngaging": "Imaginative collaboration"
         },
@@ -601,7 +703,7 @@
         },
         {
             "id": 29,
-            "level": 2,
+            "level": 3,
             "interest": "art",
             "energy": "medium",
             "duration": "20 min",
@@ -614,7 +716,7 @@
         },
         {
             "id": 30,
-            "level": 2,
+            "level": 3,
             "interest": "fitness",
             "energy": "medium",
             "duration": "20 min",
@@ -699,7 +801,7 @@
         },
         {
             "id": 36,
-            "level": 2,
+            "level": 3,
             "interest": "travel",
             "energy": "medium",
             "duration": "20 min",
@@ -745,7 +847,7 @@
         },
         {
             "id": 39,
-            "level": 2,
+            "level": 3,
             "interest": "science",
             "energy": "medium",
             "duration": "20 min",
@@ -768,6 +870,91 @@
             "type": "build",
             "completion": "Challenge complete + Done",
             "whyEngaging": "Longer shared goal feels like real teamwork"
+        },
+        {
+            "id": 41,
+            "level": 2,
+            "interest": "psychology",
+            "energy": "medium",
+            "duration": "5 min",
+            "title": "😬 Social Pain",
+            "description": "Choose between two awkward social situations. No physical harm, just pure cringe.",
+            "type": "showdown",
+            "options": [
+                "Accidentally like an ex’s post from 5 years ago vs Send a risky text to the wrong group chat",
+                "Have one viral embarrassing moment vs Be mildly awkward in every social situation forever",
+                "Everyone misinterprets one thing you say vs You never get to explain yourself",
+                "Be hated by one person you admire vs Be tolerated by everyone, admired by no one",
+                "Always overshare a little vs Always hold back too much"
+            ]
+        },
+        {
+            "id": 42,
+            "level": 2,
+            "interest": "psychology",
+            "energy": "high",
+            "duration": "8 min",
+            "title": "🧠 Moral Discomfort",
+            "description": "Navigating the grey zones of ethics and reputation.",
+            "type": "showdown",
+            "options": [
+                "Do the wrong thing once for a big reward vs Always do the right thing but miss out",
+                "Benefit from a system you know is unfair vs Reject it and struggle more",
+                "Protect someone you love even if they’re wrong vs Call them out publicly",
+                "Stay silent to keep the peace vs Speak up and cause tension",
+                "Be forgiven but never trusted again vs Be trusted but never forgiven"
+            ]
+        },
+        {
+            "id": 43,
+            "level": 2,
+            "interest": "philosophy",
+            "energy": "medium",
+            "duration": "5 min",
+            "title": "🤯 Absurd but Revealing",
+            "description": "Deeply strange questions that actually expose your inner world.",
+            "type": "showdown",
+            "options": [
+                "Everyone thinks you’re smarter than you are vs Everyone knows exactly how smart you are",
+                "Be right too early vs Be wrong until the last moment",
+                "Know how people see you vs Never know, but live peacefully",
+                "Have perfect control over your image vs Be fully authentic but misunderstood",
+                "One person truly gets you vs Many people sort of like you"
+            ]
+        },
+        {
+            "id": 44,
+            "level": 2,
+            "interest": "social",
+            "energy": "high",
+            "duration": "6 min",
+            "title": "🧨 Relationship Tension",
+            "description": "Not just dating—these are the hard choices of human connection.",
+            "type": "showdown",
+            "options": [
+                "End a relationship cleanly vs Let it fade awkwardly",
+                "Be remembered fondly but briefly vs Be unforgettable but polarizing",
+                "Hear the truth you don’t want vs Believe a comforting lie",
+                "Be needed vs Be chosen freely",
+                "Feel safe vs Feel alive"
+            ]
+        },
+        {
+            "id": 45,
+            "level": 2,
+            "interest": "culture",
+            "energy": "high",
+            "duration": "4 min",
+            "title": "🔥 Screenshot-able Finishers",
+            "description": "The heavy hitters. These define the vibe of your partnership.",
+            "type": "showdown",
+            "options": [
+                "Success without meaning vs Meaning without success",
+                "Loyalty that blinds you vs Honesty that hurts",
+                "Be the villain in one story vs Be irrelevant in all stories",
+                "Be admired for something fake vs Ignored for something real",
+                "Have power vs Have peace"
+            ]
         }
     ]
 }
