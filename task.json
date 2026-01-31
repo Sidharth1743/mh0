@@ -1,0 +1,1099 @@
+{
+    "tasks": [
+        {
+            "id": 101,
+            "level": 1,
+            "interest": "lifestyle",
+            "energy": "low",
+            "duration": "5 min",
+            "title": "Weekend Vibe Rank",
+            "description": "Rank 6 weekend activities from 'most relaxing' to 'least'. Shared memory is born here.",
+            "steps": 6,
+            "type": "ranking",
+            "options": [
+                "Strolling through a park",
+                "Reading by the window",
+                "Watching the sunset",
+                "Cooking a slow meal",
+                "Listening to a podcast",
+                "Taking a long nap"
+            ],
+            "completion": "Both finish ranking + Reveal differences",
+            "whyEngaging": "Zero typing, natural disagreement leads to collaboration"
+        },
+        {
+            "id": 102,
+            "level": 1,
+            "interest": "music",
+            "energy": "low",
+            "duration": "5 min",
+            "title": "The 15-Minute Commute",
+            "description": "Pick exactly 3 songs to survive a short commute. Scarcity forces discussion without chat.",
+            "steps": 3,
+            "type": "selection",
+            "options": [
+                "Lofi Beats",
+                "90s Pop",
+                "Indie Folk",
+                "Classical Piano",
+                "Acid Jazz",
+                "Hard Rock"
+            ],
+            "completion": "3 songs picked + Locked in",
+            "whyEngaging": "Everyone feels involved, no right answer"
+        },
+        {
+            "id": 103,
+            "level": 1,
+            "interest": "food",
+            "energy": "low",
+            "duration": "3 min",
+            "title": "Binary Vibe Check",
+            "description": "Coffee vs Tea? Mountains vs Beach? 8 quick choices to see if you align.",
+            "steps": 8,
+            "type": "binary",
+            "options": [
+                "Coffee vs Tea",
+                "Mountains vs Beach",
+                "Morning vs Night",
+                "Dogs vs Cats",
+                "City vs Country",
+                "Summer vs Winter",
+                "Fiction vs Non-fiction",
+                "Pizza vs Burger"
+            ],
+            "completion": "8 choices made + Alignment revealed",
+            "whyEngaging": "Instant bonding, pattern recognition"
+        },
+        {
+            "id": 104,
+            "level": 1,
+            "interest": "travel",
+            "energy": "low",
+            "duration": "5 min",
+            "title": "Travel Bucket Sort",
+            "description": "Sort travel items into 'Must-have', 'Nice-to-have', and 'Skip'. Feels productive, not social.",
+            "steps": 10,
+            "type": "sorting",
+            "options": [
+                "Sunscreen",
+                "Camera",
+                "Passport",
+                "Protein Bars",
+                "Extra Socks",
+                "Portable Charger",
+                "First Aid Kit",
+                "Travel Map"
+            ],
+            "completion": "All cards sorted + Merged view",
+            "whyEngaging": "Low pressure, reveals values through utility"
+        },
+        {
+            "id": 105,
+            "level": 1,
+            "interest": "logic",
+            "energy": "medium",
+            "duration": "5 min",
+            "title": "Node Untangler",
+            "description": "Manipulate a shared node graph together to untangle the mess. Pure cooperation.",
+            "steps": 1,
+            "type": "puzzle",
+            "options": [
+                "Root Node",
+                "Branch Alpha",
+                "Branch Beta",
+                "Leaf Gamma",
+                "Leaf Delta"
+            ],
+            "completion": "No overlapping nodes + Success",
+            "whyEngaging": "Immediate team feeling, no social comparison"
+        },
+        {
+            "id": 106,
+            "level": 1,
+            "interest": "creative",
+            "energy": "medium",
+            "duration": "10 min",
+            "title": "Cozy Evening Mood Board",
+            "description": "Assemble a mood board for a 'cozy evening' together. No text, still expressive.",
+            "steps": 5,
+            "type": "build",
+            "options": [
+                "Soft blanket",
+                "Warm candle",
+                "Rain on window",
+                "Hot cocoa",
+                "Old books"
+            ],
+            "completion": "Mood board finalized + Shared Gallery",
+            "whyEngaging": "Collaborative assembly, visual expression"
+        },
+        {
+            "id": 107,
+            "level": 1,
+            "interest": "survival",
+            "energy": "medium",
+            "duration": "8 min",
+            "title": "Survival Night",
+            "description": "Choose 4 items to survive a night outdoors. Scarcity forces discussion without chat.",
+            "steps": 4,
+            "type": "selection",
+            "options": [
+                "Matchbox",
+                "Heavy blanket",
+                "Water bottle",
+                "Swiss knife",
+                "Flashlight",
+                "Protein bars"
+            ],
+            "completion": "4 items chosen",
+            "whyEngaging": "High stakes, low effort, reveals priorities"
+        },
+        {
+            "id": 108,
+            "level": 1,
+            "interest": "lifestyle",
+            "energy": "low",
+            "duration": "3 min",
+            "title": "Morning vs Night",
+            "description": "Early morning or Late night? 10 rapid binary choices to find your group's peak energy.",
+            "steps": 10,
+            "type": "binary",
+            "options": [
+                "6 AM Alarm vs 11 PM Coffee",
+                "Sunrise Yoga vs Midnight Movie",
+                "Quiet Breakfast vs Late Dinner",
+                "Bright Office vs Dim Studio",
+                "Productive Morning vs Creative Night"
+            ],
+            "completion": "10 choices made",
+            "whyEngaging": "Instant bonding through shared rhythm"
+        },
+        {
+            "id": 1,
+            "level": 1,
+            "interest": "music",
+            "energy": "low",
+            "duration": "10 min",
+            "title": "Silent Playlist Builder",
+            "description": "Take turns adding songs from a pre-matched genre to a shared 5-song playlist. No explanations needed — just tap to add.",
+            "steps": 5,
+            "type": "build",
+            "options": [
+                "Chill Lo-fi",
+                "Indie Morning",
+                "Deep Focus Piano",
+                "Sunset Groove",
+                "Jazz Coffee Shop"
+            ],
+            "completion": "Playlist reaches 5 songs + both tap 'Done'",
+            "whyEngaging": "Feels like parallel play with someone else present — zero pressure to talk"
+        },
+        {
+            "id": 2,
+            "level": 1,
+            "interest": "gaming",
+            "energy": "low",
+            "duration": "10 min",
+            "title": "Quick Game Vote",
+            "description": "Vote yes/no on 5 random game titles. Majority wins each round.",
+            "steps": 5,
+            "type": "vote",
+            "options": [
+                "The Witcher 3",
+                "Elden Ring",
+                "Minecraft",
+                "Stardew Valley",
+                "Among Us"
+            ],
+            "completion": "All 5 votes cast + mutual 'Done'",
+            "whyEngaging": "Pure taps — like liking posts together without commitment"
+        },
+        {
+            "id": 3,
+            "level": 1,
+            "interest": "tech",
+            "energy": "low",
+            "duration": "10 min",
+            "title": "Gadget Yes/No",
+            "description": "Alternate turns voting yes/no on 5 random tech gadgets shown.",
+            "steps": 5,
+            "type": "vote",
+            "options": [
+                "Smart Mirror",
+                "VR Treadmill",
+                "Hologram Projector",
+                "Dyson Airwrap",
+                "Apple Vision Pro"
+            ],
+            "completion": "5 votes completed + both confirm",
+            "whyEngaging": "Instant shared decisions with no typing"
+        },
+        {
+            "id": 4,
+            "level": 1,
+            "interest": "books",
+            "energy": "low",
+            "duration": "10 min",
+            "title": "Cover Vote Chain",
+            "description": "Vote on which book cover looks best — alternate picks from 5 options.",
+            "steps": 5,
+            "type": "vote",
+            "options": [
+                "Neo-Tokyo Cyberpunk",
+                "Vintage Noir",
+                "Minimalist Pastel",
+                "Hand-drawn Ghibli style",
+                "Gritty Realistic"
+            ],
+            "completion": "Ranking complete + Done",
+            "whyEngaging": "Visual and quick — no need to explain choices"
+        },
+        {
+            "id": 5,
+            "level": 1,
+            "interest": "cooking",
+            "energy": "low",
+            "duration": "10 min",
+            "title": "Ingredient Picker",
+            "description": "Build a simple 5-ingredient meal by alternating taps from a list.",
+            "steps": 5,
+            "type": "build",
+            "options": [
+                "Fresh Basil",
+                "Truffle Oil",
+                "Smoked Paprika",
+                "Roasted Garlic",
+                "Parmesan Reggiano"
+            ],
+            "completion": "5 ingredients selected + mutual Done",
+            "whyEngaging": "Feels productive without effort"
+        },
+        {
+            "id": 6,
+            "level": 2,
+            "interest": "culture",
+            "energy": "medium",
+            "duration": "5 min",
+            "title": "Hot Take Showdown",
+            "description": "5 rapid-fire controversial takes. No middle ground—mostly.",
+            "steps": 5,
+            "type": "showdown",
+            "showdownButtons": [
+                {
+                    "label": "🔥 Hell Yes",
+                    "value": "yes"
+                },
+                {
+                    "label": "😐 Depends",
+                    "value": "depends"
+                },
+                {
+                    "label": "❌ No Way",
+                    "value": "no"
+                }
+            ],
+            "options": [
+                "Taylor Swift is overrated",
+                "Anime is just cartoons for adults",
+                "Marvel fatigue is real",
+                "Social media has made friendships worse",
+                "Hustle culture is mostly toxic"
+            ],
+            "completion": "Showdown complete + Delayed Reveal",
+            "whyEngaging": "Spicy takes reveal true character fast"
+        },
+        {
+            "id": 7,
+            "level": 2,
+            "interest": "lifestyle",
+            "energy": "medium",
+            "duration": "5 min",
+            "title": "This or That",
+            "description": "Quick gut-check on 5 binary life preferences.",
+            "steps": 5,
+            "type": "showdown",
+            "options": [
+                "Coffee ☕ vs Tea 🍵",
+                "Mountains 🏔️ vs Beach 🏖️",
+                "Texting 📱 vs Calling 📞",
+                "Netflix 🍿 vs YouTube 📺",
+                "Stability 🏡 vs Adventure ✈️"
+            ],
+            "completion": "Preferences synced",
+            "whyEngaging": "Simple binary choices create instant alignment"
+        },
+        {
+            "id": 8,
+            "level": 2,
+            "interest": "social",
+            "energy": "medium",
+            "duration": "5 min",
+            "title": "Social Norms",
+            "description": "Spicy but safe questions about how you navigate the world.",
+            "steps": 5,
+            "type": "showdown",
+            "options": [
+                "Split the bill vs One person pays",
+                "Text back later vs Reply immediately",
+                "Cancel plans guilt-free vs Always show up",
+                "Separate lives vs Do everything together",
+                "Low expectations vs High standards"
+            ],
+            "completion": "Social profile built",
+            "whyEngaging": "Gray zone choices stimulate curiosity"
+        },
+        {
+            "id": 13,
+            "level": 2,
+            "interest": "society",
+            "energy": "medium",
+            "duration": "5 min",
+            "title": "Defend or Delete",
+            "description": "Which societal concepts stay, and which get deleted from history?",
+            "steps": 5,
+            "type": "showdown",
+            "showdownButtons": [
+                {
+                    "label": "🛡️ Defend",
+                    "value": "defend"
+                },
+                {
+                    "label": "🗑️ Delete",
+                    "value": "delete"
+                }
+            ],
+            "options": [
+                "Cancel culture has gone too far",
+                "AI will replace most jobs",
+                "Remote work makes people lonelier",
+                "Marriage is outdated",
+                "Social media breaks attention spans"
+            ],
+            "completion": "Future vision synced",
+            "whyEngaging": "High-stakes binary filtering"
+        },
+        {
+            "id": 16,
+            "level": 2,
+            "interest": "psychology",
+            "energy": "high",
+            "duration": "8 min",
+            "title": "High Dopamine Dilemmas",
+            "description": "Money, reputation, and the grey zones in between.",
+            "steps": 5,
+            "type": "showdown",
+            "options": [
+                "Win $1M (everyone thinks you cheated) vs Stay broke (respected)",
+                "Get $500k instantly vs Favorite celeb publicly dislikes you",
+                "Be rich anonymously vs Be famous for something mildly embarrassing",
+                "Paid to lie once vs Stay honest (lose big opportunity)",
+                "Protect someone you love (they're wrong) vs Call them out publicly"
+            ],
+            "completion": "Moral alignment revealed",
+            "whyEngaging": "Friction points create the best context for Level 3"
+        },
+        {
+            "id": 20,
+            "level": 2,
+            "interest": "connection",
+            "energy": "low",
+            "duration": "3 min",
+            "title": "Alignment Streak Finisher",
+            "description": "Final check before moving to persistent chat.",
+            "steps": 5,
+            "type": "showdown",
+            "showdownButtons": [
+                {
+                    "label": "👍 Yes",
+                    "value": "yes"
+                },
+                {
+                    "label": "👀 Maybe",
+                    "value": "maybe"
+                },
+                {
+                    "label": "❌ Nah",
+                    "value": "no"
+                }
+            ],
+            "options": [
+                "We’re on the same wavelength",
+                "I’d do another round with this group",
+                "Our opinions matched more than I expected",
+                "This felt surprisingly easy",
+                "I’m curious to see what we’d disagree on next"
+            ],
+            "completion": "Vibe check complete",
+            "whyEngaging": "Meta-reflection builds trust"
+        },
+        {
+            "id": 9,
+            "level": 3,
+            "interest": "fitness",
+            "energy": "medium",
+            "duration": "30 min",
+            "title": "Workout Remix",
+            "description": "Build a 8-exercise routine; alternate suggestions + optional 15-sec voice note on why one works.",
+            "steps": 8,
+            "type": "build",
+            "completion": "Routine complete + optional voice + Done",
+            "whyEngaging": "Voice adds warmth after basics built"
+        },
+        {
+            "id": 10,
+            "level": 3,
+            "interest": "travel",
+            "energy": "high",
+            "duration": "30 min",
+            "title": "Dream Trip Plan",
+            "description": "Plan a hypothetical 3-day trip; alternate destinations/activities + voice reaction to one idea.",
+            "steps": 9,
+            "type": "imagine",
+            "completion": "Plan finalized + Done",
+            "whyEngaging": "Creative escapism feels collaborative"
+        },
+        {
+            "id": 11,
+            "level": 1,
+            "interest": "art",
+            "energy": "low",
+            "duration": "10 min",
+            "title": "Color Palette Vote",
+            "description": "Vote yes/no on 5 color palettes for a random theme.",
+            "steps": 5,
+            "type": "vote",
+            "options": [
+                "Midnight Deep Sea",
+                "Sunset Sahara",
+                "Arctic Aurora",
+                "Bloom Spring",
+                "Autumn Ember"
+            ],
+            "completion": "5 votes + Done"
+        },
+        {
+            "id": 12,
+            "level": 4,
+            "interest": "tech",
+            "energy": "high",
+            "duration": "30 min",
+            "title": "Future Gadget Brainstorm",
+            "description": "Invent 5 future gadgets together; opt-in share one personal 'wish' reason.",
+            "steps": 10,
+            "type": "imagine",
+            "completion": "List complete + Done",
+            "whyEngaging": "By level 4, sharing feels earned and safe"
+        },
+        {
+            "id": 14,
+            "level": 1,
+            "interest": "movies",
+            "energy": "low",
+            "duration": "10 min",
+            "title": "Poster Vote",
+            "description": "Vote on which movie poster looks coolest — alternate picks.",
+            "steps": 5,
+            "type": "vote",
+            "options": [
+                "Original Star Wars",
+                "Pulp Fiction",
+                "Vertigo",
+                "Jaws",
+                "Parasite"
+            ],
+            "completion": "Ranking done + Done"
+        },
+        {
+            "id": 15,
+            "level": 3,
+            "interest": "books",
+            "energy": "medium",
+            "duration": "30 min",
+            "title": "Book Ending Rewrite",
+            "description": "Pick a famous book ending; alternate rewrite ideas + voice note on one.",
+            "steps": 8,
+            "type": "imagine",
+            "completion": "Rewritten ending + Done"
+        },
+        {
+            "id": 17,
+            "level": 1,
+            "interest": "fitness",
+            "energy": "low",
+            "duration": "10 min",
+            "title": "Stretch Selector",
+            "description": "Pick 5 stretches for a quick relaxation session from a visual list.",
+            "steps": 5,
+            "type": "build",
+            "options": [
+                "Neck Rolls",
+                "Shoulder Shrugs",
+                "TouchToes",
+                "Cobra Stretch",
+                "Child's Pose",
+                "Hamstring Reach"
+            ],
+            "completion": "Routine built + Done",
+            "whyEngaging": "Easy and helpful"
+        },
+        {
+            "id": 18,
+            "level": 1,
+            "interest": "travel",
+            "energy": "low",
+            "duration": "10 min",
+            "title": "Passport Stamp Vote",
+            "description": "Vote on the most aesthetic passport stamps/vistas from 5 options.",
+            "steps": 5,
+            "type": "vote",
+            "options": [
+                "French Riviera",
+                "Tokyo Skyline",
+                "Swiss Alps",
+                "Amazon Rainforest",
+                "Santorini Blue"
+            ],
+            "completion": "Votes cast + Done",
+            "whyEngaging": "Wanderlust with zero effort"
+        },
+        {
+            "id": 19,
+            "level": 1,
+            "interest": "art",
+            "energy": "low",
+            "duration": "10 min",
+            "title": "Museum Room Sort",
+            "description": "Drag and drop 5 paintings into a 'virtual museum room' order.",
+            "steps": 5,
+            "type": "build",
+            "options": [
+                "The Starry Night",
+                "Monet's Water Lilies",
+                "The Scream",
+                "Girl with a Pearl Earring",
+                "The Kiss"
+            ],
+            "completion": "Room arranged + Done",
+            "whyEngaging": "Visual tactile play"
+        },
+        {
+            "id": 21,
+            "level": 3,
+            "interest": "science",
+            "energy": "medium",
+            "duration": "20 min",
+            "title": "Space Mission Name",
+            "description": "Design a mission to a planet; alternate picking goals and name ideas.",
+            "steps": 6,
+            "type": "imagine",
+            "reflectionChips": [
+                "To the moon",
+                "Bold mission",
+                "Scientific",
+                "Dangerous"
+            ],
+            "completion": "Mission brief complete + Done",
+            "whyEngaging": "Imaginative collaboration"
+        },
+        {
+            "id": 22,
+            "level": 3,
+            "interest": "music",
+            "energy": "medium",
+            "duration": "30 min",
+            "title": "Lyric Line Swap",
+            "description": "Pick a topic; take turns writing one line for a hypothetical song chorus.",
+            "steps": 8,
+            "type": "build",
+            "completion": "Chorus finished + Done",
+            "whyEngaging": "Rhythmic connection"
+        },
+        {
+            "id": 23,
+            "level": 3,
+            "interest": "gaming",
+            "energy": "medium",
+            "duration": "30 min",
+            "title": "Level Design Draft",
+            "description": "Describe a game level theme/obstacle in turns + voice note for the boss room.",
+            "steps": 8,
+            "type": "imagine",
+            "completion": "Level map complete + Done",
+            "whyEngaging": "Deeper gamer bond"
+        },
+        {
+            "id": 24,
+            "level": 3,
+            "interest": "movies",
+            "energy": "medium",
+            "duration": "30 min",
+            "title": "Cast the Remake",
+            "description": "Pick an old movie; take turns casting modern actors for roles + one line 'why'.",
+            "steps": 8,
+            "type": "imagine",
+            "completion": "Cast list complete + Done",
+            "whyEngaging": "Pop culture fun"
+        },
+        {
+            "id": 25,
+            "level": 4,
+            "interest": "books",
+            "energy": "high",
+            "duration": "30 min+",
+            "title": "Shared World Build",
+            "description": "Create a 5-point setting description for a fantasy world; share one 'law' of this world via voice.",
+            "steps": 10,
+            "type": "imagine",
+            "completion": "World bible start + Done",
+            "whyEngaging": "Rich collaborative creation"
+        },
+        {
+            "id": 26,
+            "level": 4,
+            "interest": "travel",
+            "energy": "high",
+            "duration": "30 min+",
+            "title": "Local Secret Exchange",
+            "description": "Share 3 things about your city (not specific location); swap voice notes about the 'best hidden spot'.",
+            "steps": 10,
+            "type": "build",
+            "completion": "Exchange complete + Done",
+            "whyEngaging": "Meaningful but safe personal connection"
+        },
+        {
+            "id": 27,
+            "level": 1,
+            "interest": "tech",
+            "energy": "low",
+            "duration": "10 min",
+            "title": "Logo Shape Vote",
+            "description": "Vote on the cleanest logo designs from 5 abstract choices.",
+            "steps": 5,
+            "type": "vote",
+            "options": [
+                "Minimalist Circle",
+                "Golden Spiral",
+                "Negative Space",
+                "Geometric Abstract",
+                "Organic Fluid"
+            ],
+            "completion": "Votes cast + Done",
+            "whyEngaging": "Minimalist and quick"
+        },
+        {
+            "id": 28,
+            "level": 1,
+            "interest": "science",
+            "energy": "low",
+            "duration": "10 min",
+            "title": "Nature Photo Pair",
+            "description": "Match 5 animal photos with their habitat name — alternate turns.",
+            "steps": 5,
+            "type": "solve",
+            "options": [
+                "Lion -> African Savanna",
+                "Penguin -> Arctic Coast",
+                "Orangutan -> Tropical Jungle",
+                "Camel -> Gobi Desert",
+                "Panda -> Bamboo Forest"
+            ],
+            "completion": "All matched + Done",
+            "whyEngaging": "Satisfying mini-puzzle"
+        },
+        {
+            "id": 29,
+            "level": 3,
+            "interest": "art",
+            "energy": "medium",
+            "duration": "20 min",
+            "title": "Style Generator",
+            "description": "Pick a subject and an art style; alternate adding 3 visual descriptors.",
+            "steps": 6,
+            "type": "build",
+            "completion": "Description complete + Done",
+            "whyEngaging": "Creative visual thinking"
+        },
+        {
+            "id": 30,
+            "level": 3,
+            "interest": "fitness",
+            "energy": "medium",
+            "duration": "20 min",
+            "title": "Healthy Habit Swap",
+            "description": "List 3 quick healthy habits; swap one line on which you'd try today.",
+            "steps": 6,
+            "type": "build",
+            "completion": "Habits listed + choice made",
+            "whyEngaging": "Supportive without pressure"
+        },
+        {
+            "id": 31,
+            "level": 1,
+            "interest": "music",
+            "energy": "low",
+            "duration": "10 min",
+            "title": "Instrument Sound Vote",
+            "description": "Listen to 5 short clips; vote on the mood (calm, energetic, etc) for each.",
+            "steps": 5,
+            "type": "vote",
+            "options": [
+                "Cellos in D Minor",
+                "Upbeat Synthesizer",
+                "Distant Thunder & Rain",
+                "Acoustic Folk Guitar",
+                "Fast-paced Jazz Drums"
+            ],
+            "completion": "Votes cast + Done",
+            "whyEngaging": "Auditory connection"
+        },
+        {
+            "id": 32,
+            "level": 3,
+            "interest": "tech",
+            "energy": "medium",
+            "duration": "30 min",
+            "title": "PC Build Draft",
+            "description": "Choose a budget; alternate picking parts for a PC build + one line why for the GPU.",
+            "steps": 8,
+            "type": "build",
+            "completion": "Build list complete + Done",
+            "whyEngaging": "Geeky collaboration"
+        },
+        {
+            "id": 33,
+            "level": 3,
+            "interest": "cooking",
+            "energy": "medium",
+            "duration": "30 min",
+            "title": "Global Spice Tour",
+            "description": "Pick a region; alternate sharing 4 spices used there + voice note describing home cooking smell.",
+            "steps": 8,
+            "type": "build",
+            "completion": "Spice list + voice + Done",
+            "whyEngaging": "Sensory sharing"
+        },
+        {
+            "id": 34,
+            "level": 4,
+            "interest": "gaming",
+            "energy": "high",
+            "duration": "30 min+",
+            "title": "E-Sports Team Draft",
+            "description": "Draft a 5-player hypothetical team from game characters; record 30s voice clip on your strategy.",
+            "steps": 10,
+            "type": "build",
+            "completion": "Team ready + strategy note + Done",
+            "whyEngaging": "Competitive and cooperative"
+        },
+        {
+            "id": 35,
+            "level": 4,
+            "interest": "movies",
+            "energy": "high",
+            "duration": "30 min+",
+            "title": "Film Theory Debate",
+            "description": "Pick a movie mystery; alternate sharing 3 clues + voice note on your final 'theory'.",
+            "steps": 10,
+            "type": "solve",
+            "completion": "Theory shared + Done",
+            "whyEngaging": "Deep interest dive"
+        },
+        {
+            "id": 36,
+            "level": 3,
+            "interest": "travel",
+            "energy": "medium",
+            "duration": "20 min",
+            "title": "Souvenir Wishlist",
+            "description": "Choose a country; alternate listing 5 unique souvenirs you'd buy there.",
+            "steps": 6,
+            "type": "build",
+            "completion": "List complete + Done",
+            "whyEngaging": "Lighthearted imagining"
+        },
+        {
+            "id": 37,
+            "level": 1,
+            "interest": "books",
+            "energy": "low",
+            "duration": "10 min",
+            "title": "Chapter Title Vote",
+            "description": "Vote on the most intriguing chapter titles from 5 book samples.",
+            "steps": 5,
+            "type": "vote",
+            "options": [
+                "The Boy Who Lived",
+                "A Long-expected Party",
+                "The Shadow of the Past",
+                "Down the Rabbit-Hole",
+                "In a Hole in the Ground"
+            ],
+            "completion": "Votes cast + Done",
+            "whyEngaging": "Quick literary play"
+        },
+        {
+            "id": 38,
+            "level": 3,
+            "interest": "art",
+            "energy": "medium",
+            "duration": "30 min",
+            "title": "Collaborative Canvas",
+            "description": "Alternately describe 5 layers of a digital art piece + voice note on the 'message'.",
+            "steps": 8,
+            "type": "imagine",
+            "completion": "Concept complete + Done",
+            "whyEngaging": "Abstract creative spark"
+        },
+        {
+            "id": 39,
+            "level": 3,
+            "interest": "science",
+            "energy": "medium",
+            "duration": "20 min",
+            "title": "Hypothetical Outcome",
+            "description": "Pick a 'What If' (e.g., no gravity); alternate listing 5 consequences.",
+            "steps": 6,
+            "type": "imagine",
+            "completion": "List complete + Done",
+            "whyEngaging": "Intellectual fun"
+        },
+        {
+            "id": 40,
+            "level": 4,
+            "interest": "fitness",
+            "energy": "high",
+            "duration": "weekend",
+            "title": "Custom Challenge Design",
+            "description": "Design a 30-day fitness challenge together; opt-in share why one element matters to you.",
+            "steps": 12,
+            "type": "build",
+            "completion": "Challenge complete + Done",
+            "whyEngaging": "Longer shared goal feels like real teamwork"
+        },
+        {
+            "id": 41,
+            "level": 2,
+            "interest": "psychology",
+            "energy": "medium",
+            "duration": "5 min",
+            "title": "😬 Social Pain",
+            "description": "Choose between two awkward social situations. No physical harm, just pure cringe.",
+            "type": "showdown",
+            "options": [
+                "Accidentally like an ex’s post from 5 years ago vs Send a risky text to the wrong group chat",
+                "Have one viral embarrassing moment vs Be mildly awkward in every social situation forever",
+                "Everyone misinterprets one thing you say vs You never get to explain yourself",
+                "Be hated by one person you admire vs Be tolerated by everyone, admired by no one",
+                "Always overshare a little vs Always hold back too much"
+            ],
+            "steps": 5,
+            "completion": "Shared perspective found",
+            "whyEngaging": "Deeper psychological sync"
+        },
+        {
+            "id": 42,
+            "level": 2,
+            "interest": "psychology",
+            "energy": "high",
+            "duration": "8 min",
+            "title": "🧠 Moral Discomfort",
+            "description": "Navigating the grey zones of ethics and reputation.",
+            "type": "showdown",
+            "options": [
+                "Do the wrong thing once for a big reward vs Always do the right thing but miss out",
+                "Benefit from a system you know is unfair vs Reject it and struggle more",
+                "Protect someone you love even if they’re wrong vs Call them out publicly",
+                "Stay silent to keep the peace vs Speak up and cause tension",
+                "Be forgiven but never trusted again vs Be trusted but never forgiven"
+            ],
+            "steps": 5,
+            "completion": "Moral alignment clarified",
+            "whyEngaging": "Ethical boundary discovery"
+        },
+        {
+            "id": 43,
+            "level": 2,
+            "interest": "philosophy",
+            "energy": "medium",
+            "duration": "5 min",
+            "title": "🤯 Absurd but Revealing",
+            "description": "Deeply strange questions that actually expose your inner world.",
+            "type": "showdown",
+            "options": [
+                "Everyone thinks you’re smarter than you are vs Everyone knows exactly how smart you are",
+                "Be right too early vs Be wrong until the last moment",
+                "Know how people see you vs Never know, but live peacefully",
+                "Have perfect control over your image vs Be fully authentic but misunderstood",
+                "One person truly gets you vs Many people sort of like you"
+            ],
+            "steps": 5,
+            "completion": "Inner truth surfaced",
+            "whyEngaging": "Reveals values through strange scenarios"
+        },
+        {
+            "id": 44,
+            "level": 2,
+            "interest": "social",
+            "energy": "high",
+            "duration": "6 min",
+            "title": "🧨 Relationship Tension",
+            "description": "Not just dating—these are the hard choices of human connection.",
+            "type": "showdown",
+            "options": [
+                "End a relationship cleanly vs Let it fade awkwardly",
+                "Be remembered fondly but briefly vs Be unforgettable but polarizing",
+                "Hear the truth you don’t want vs Believe a comforting lie",
+                "Be needed vs Be chosen freely",
+                "Feel safe vs Feel alive"
+            ],
+            "steps": 5,
+            "completion": "Connection priorities synced",
+            "whyEngaging": "Builds relational intuition"
+        },
+        {
+            "id": 45,
+            "level": 2,
+            "interest": "culture",
+            "energy": "high",
+            "duration": "4 min",
+            "title": "🔥 Screenshot-able Finishers",
+            "description": "The heavy hitters. These define the vibe of your partnership.",
+            "type": "showdown",
+            "options": [
+                "Success without meaning vs Meaning without success",
+                "Loyalty that blinds you vs Honesty that hurts",
+                "Be the villain in one story vs Be irrelevant in all stories",
+                "Be admired for something fake vs Ignored for something real",
+                "Have power vs Have peace"
+            ],
+            "steps": 5,
+            "completion": "Finish line reached together",
+            "whyEngaging": "High stakes alignment"
+        },
+        {
+            "id": 46,
+            "level": 2,
+            "interest": "social",
+            "energy": "medium",
+            "duration": "6 min",
+            "title": "🤝 Conflict Resolution",
+            "description": "Navigating the friction points of collaboration.",
+            "type": "showdown",
+            "options": [
+                "Address the issue immediately vs Wait for the right moment",
+                "Prioritize the relationship vs Prioritize the truth",
+                "Apologize first even if you’re not wrong vs Wait for them to apologize",
+                "Express feelings directly vs Use subtle hints",
+                "Forgive and forget vs Forgive but remember"
+            ],
+            "steps": 5,
+            "completion": "Bridges built",
+            "whyEngaging": "Learning each other's resolution styles"
+        },
+        {
+            "id": 47,
+            "level": 2,
+            "interest": "psychology",
+            "energy": "medium",
+            "duration": "5 min",
+            "title": "👁️ Bias & Blindspots",
+            "description": "We all have them. Let's see if yours align.",
+            "type": "showdown",
+            "options": [
+                "Trust your gut first vs Trust data first",
+                "Assume positive intent by default vs Be cautious until proven otherwise",
+                "See your own mistakes clearly vs See others' mistakes more easily",
+                "Changing your mind is a strength vs Changing your mind is a weakness",
+                "Value lived experience over expertise vs Value expertise over lived experience"
+            ],
+            "steps": 5,
+            "completion": "Blindspots exposed",
+            "whyEngaging": "Intellectual honesty and self-awareness"
+        },
+        {
+            "id": 201,
+            "level": 3,
+            "interest": "connection",
+            "energy": "high",
+            "duration": "5 min",
+            "title": "The Haptic Harmonic",
+            "description": "Keep your sliders aligned. Feel the rhythm of your partner's movement.",
+            "steps": 1,
+            "type": "sync_haptic",
+            "options": [],
+            "completion": "Maintain sync for 30s",
+            "whyEngaging": "Pure biological connection through rhythm"
+        },
+        {
+            "id": 202,
+            "level": 3,
+            "interest": "trust",
+            "energy": "medium",
+            "duration": "5 min",
+            "title": "The Pulse Compass",
+            "description": "One guides, one moves. Follow the haptic pulses to find the hidden star.",
+            "steps": 1,
+            "type": "pulse_compass",
+            "options": [],
+            "completion": "Target found",
+            "whyEngaging": "Builds reliance and non-verbal trust"
+        },
+        {
+            "id": 203,
+            "level": 3,
+            "interest": "values",
+            "energy": "medium",
+            "duration": "8 min",
+            "title": "The Third Option",
+            "description": "You disagreed before. Now build a 'Middle Ground' definition together.",
+            "steps": 3,
+            "type": "negotiate",
+            "options": [
+                {
+                    "label": "Full Honesty",
+                    "value": "A"
+                },
+                {
+                    "label": "Protect Feelings",
+                    "value": "B"
+                }
+            ],
+            "completion": "Consensus reached",
+            "whyEngaging": "Intellectual alignment and compromise"
+        },
+        {
+            "id": 204,
+            "level": 3,
+            "interest": "creative",
+            "energy": "medium",
+            "duration": "6 min",
+            "title": "The Shared Mosaic",
+            "description": "A 4x4 grid. You only see your neighbor's blocks. Build a pattern together.",
+            "steps": 16,
+            "type": "mosaic",
+            "options": [
+                "#3B82F6",
+                "#F472B6",
+                "#10B981",
+                "#F59E0B"
+            ],
+            "completion": "Grid filled",
+            "whyEngaging": "Shared aesthetic vision"
+        },
+        {
+            "id": 205,
+            "level": 3,
+            "interest": "music",
+            "energy": "high",
+            "duration": "5 min",
+            "title": "The Echo Sequence",
+            "description": "Repeat the rhythm. Add a beat. Build a shared song.",
+            "steps": 5,
+            "type": "echo_sequence",
+            "options": [],
+            "completion": "Sequence length 8 reached",
+            "whyEngaging": "Inside jokes formed through sound"
+        }
+    ]
+}

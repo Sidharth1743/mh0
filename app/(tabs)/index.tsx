@@ -1,98 +1,286 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
+import { api } from '@/convex/_generated/api';
+import { Id } from '@/convex/_generated/dataModel';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useMutation, useQuery } from 'convex/react';
+import { useRouter } from 'expo-router';
+import { Layout, Shield, Zap } from 'lucide-react-native';
+import { useEffect, useState } from 'react';
+import { ActivityIndicator, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { BuddyTheme } from '../../constants/BuddyTheme';
 
-import { HelloWave } from '@/components/hello-wave';
-import ParallaxScrollView from '@/components/parallax-scroll-view';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { Link } from 'expo-router';
+export default function TabOneScreen() {
+  const [isMatching, setIsMatching] = useState(false);
+  const [userId, setUserId] = useState<Id<"users"> | null>(null);
+  const router = useRouter();
 
-export default function HomeScreen() {
+  // Convex
+  const findMatchMut = useMutation(api.users.findMatch);
+  const updateUserPrefsMut = useMutation(api.users.updateUserPrefs);
+  const activeMatchId = useQuery(api.users.getMyMatch, userId ? { userId } : "skip");
+  const activeMatch = useQuery(api.users.getMatch, activeMatchId ? { matchId: activeMatchId } : "skip");
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      const id = await AsyncStorage.getItem('convex_user_id');
+      if (id) setUserId(id as Id<"users">);
+    };
+    fetchUser();
+  }, []);
+
+  const startMatching = async () => {
+    if (!userId) return;
+    setIsMatching(true);
+    try {
+      // 1. Set matching state in DB
+      await updateUserPrefsMut({
+        userId,
+        interests: ['Literature', 'Technology'], // Real apps would get this from profile/onboarding
+        energyLevel: 'medium',
+        availability: '30min'
+      });
+
+      // 2. Try to find match
+      const matchId = await findMatchMut({ userId });
+
+      if (matchId) {
+        setIsMatching(false);
+        router.push(`/task/${matchId}`);
+      } else {
+        // In a real app we'd wait for a callback or use a query. 
+        // For the demo, we'll simulate a slight wait then retry or fail.
+        setTimeout(() => {
+          setIsMatching(false);
+          // In the "happy path" demo, let's just push to a mock match if real partner missing
+          // But for this refined logic, we'll stay idle.
+        }, 3000);
+      }
+    } catch (e) {
+      console.error(e);
+      setIsMatching(false);
+    }
+  };
+
+  if (activeMatch) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <View style={styles.matchContent}>
+          <Animated.View entering={FadeIn} style={styles.matchCard}>
+            <Text style={styles.matchLabel}>SHARED FOCUS</Text>
+            <Text style={styles.matchTitle}>Nodes active</Text>
+            <Text style={styles.matchSubtitle}>Establishing a shared workspace with Participant #{activeMatch._id.toString().slice(-2)}</Text>
+
+            <View style={styles.commonContainer}>
+              <Text style={styles.commonText}>Shared focus: Literature, Technology</Text>
+            </View>
+
+            <TouchableOpacity
+              activeOpacity={0.8}
+              style={styles.taskButton}
+              onPress={() => router.push(`/task/${activeMatch._id}`)}
+            >
+              <Text style={styles.buttonText}>Start group task</Text>
+            </TouchableOpacity>
+          </Animated.View>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12',
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <Link href="/modal">
-          <Link.Trigger>
-            <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-          </Link.Trigger>
-          <Link.Preview />
-          <Link.Menu>
-            <Link.MenuAction title="Action" icon="cube" onPress={() => alert('Action pressed')} />
-            <Link.MenuAction
-              title="Share"
-              icon="square.and.arrow.up"
-              onPress={() => alert('Share pressed')}
-            />
-            <Link.Menu title="More" icon="ellipsis">
-              <Link.MenuAction
-                title="Delete"
-                icon="trash"
-                destructive
-                onPress={() => alert('Delete pressed')}
-              />
-            </Link.Menu>
-          </Link.Menu>
-        </Link>
+    <SafeAreaView style={styles.container}>
+      <View style={styles.header}>
+        <Text style={styles.title}>Dashboard</Text>
+        <View style={styles.statsBadge}>
+          <Shield size={16} color={BuddyTheme.colors.secondary} />
+          <Text style={styles.statsText}>Layer 1</Text>
+        </View>
+      </View>
 
-        <ThemedText>
-          {`Tap the Explore tab to learn more about what's included in this starter app.`}
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          {`When you're ready, run `}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+      <View style={styles.main}>
+        {isMatching ? (
+          <Animated.View entering={FadeIn} exiting={FadeOut} style={styles.matchingState}>
+            <ActivityIndicator size="large" color={BuddyTheme.colors.secondary} />
+            <Text style={styles.matchingText}>Synchronizing nodes...</Text>
+            <Text style={styles.matchingSubtext}>Finding a partner within your wavelength.</Text>
+          </Animated.View>
+        ) : (
+          <Animated.View entering={FadeIn} style={styles.idleState}>
+            <View style={styles.heroCircle}>
+              <Layout size={40} color={BuddyTheme.colors.primary} />
+            </View>
+            <Text style={styles.heroTitle}>Initiate Collaboration</Text>
+            <Text style={styles.heroDescription}>
+              Anonymous, task-based networking. Trust build through shared execution.
+            </Text>
+
+            <TouchableOpacity
+              activeOpacity={0.8}
+              style={styles.findButton}
+              onPress={startMatching}
+            >
+              <Zap size={20} color="#FFF" />
+              <Text style={styles.findButtonText}>Find Partner</Text>
+            </TouchableOpacity>
+          </Animated.View>
+        )}
+      </View>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  titleContainer: {
+  container: {
+    flex: 1,
+    backgroundColor: BuddyTheme.colors.background,
+  },
+  header: {
+    padding: 32,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  title: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    color: BuddyTheme.colors.primary,
+  },
+  statsBadge: {
     flexDirection: 'row',
     alignItems: 'center',
+    backgroundColor: 'rgba(38, 166, 154, 0.1)',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: BuddyTheme.borderRadius.full,
     gap: 8,
   },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
+  statsText: {
+    color: BuddyTheme.colors.secondary,
+    fontWeight: '700',
+    fontSize: 14,
   },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
+  main: {
+    flex: 1,
+    justifyContent: 'center',
+    paddingHorizontal: 32,
+  },
+  idleState: {
+    alignItems: 'center',
+  },
+  heroCircle: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    backgroundColor: BuddyTheme.colors.surface,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 32,
+    borderWidth: 1.5,
+    borderColor: BuddyTheme.colors.border,
+  },
+  heroTitle: {
+    fontSize: 26,
+    fontWeight: 'bold',
+    color: BuddyTheme.colors.primary,
+    marginBottom: 16,
+    textAlign: 'center',
+  },
+  heroDescription: {
+    fontSize: 17,
+    color: BuddyTheme.colors.textSecondary,
+    textAlign: 'center',
+    marginBottom: 48,
+    lineHeight: 26,
+  },
+  findButton: {
+    backgroundColor: BuddyTheme.colors.primary,
+    flexDirection: 'row',
+    paddingVertical: 20,
+    borderRadius: BuddyTheme.borderRadius.lg,
+    alignItems: 'center',
+    gap: 12,
+    width: '100%',
+    justifyContent: 'center',
+  },
+  findButtonText: {
+    color: '#FFFFFF',
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+  matchingState: {
+    alignItems: 'center',
+    gap: 20,
+  },
+  matchingText: {
+    color: BuddyTheme.colors.primary,
+    fontSize: 20,
+    fontWeight: '600',
+  },
+  matchingSubtext: {
+    color: BuddyTheme.colors.textSecondary,
+    fontSize: 15,
+  },
+  matchContent: {
+    flex: 1,
+    justifyContent: 'center',
+    padding: 32,
+  },
+  matchCard: {
+    backgroundColor: BuddyTheme.colors.surface,
+    padding: 40,
+    borderRadius: BuddyTheme.borderRadius.xl,
+    alignItems: 'center',
+    borderWidth: 1.5,
+    borderColor: BuddyTheme.colors.secondary,
+    shadowColor: BuddyTheme.colors.secondary,
+    shadowOpacity: 0.1,
+    shadowRadius: 20,
+    elevation: 5,
+  },
+  matchLabel: {
+    fontSize: 12,
+    fontWeight: '800',
+    color: BuddyTheme.colors.secondary,
+    letterSpacing: 2,
+    marginBottom: 16,
+  },
+  matchTitle: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    color: BuddyTheme.colors.primary,
+    marginBottom: 12,
+    textAlign: 'center',
+  },
+  matchSubtitle: {
+    fontSize: 16,
+    color: BuddyTheme.colors.textSecondary,
+    marginBottom: 32,
+    textAlign: 'center',
+  },
+  commonContainer: {
+    backgroundColor: 'rgba(38, 166, 154, 0.08)',
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    borderRadius: BuddyTheme.borderRadius.md,
+    marginBottom: 40,
+  },
+  commonText: {
+    color: BuddyTheme.colors.secondary,
+    fontWeight: '600',
+    fontSize: 15,
+  },
+  taskButton: {
+    backgroundColor: BuddyTheme.colors.secondary,
+    paddingVertical: 20,
+    paddingHorizontal: 32,
+    borderRadius: BuddyTheme.borderRadius.lg,
+    width: '100%',
+    alignItems: 'center',
+  },
+  buttonText: {
+    color: '#FFF',
+    fontSize: 18,
+    fontWeight: 'bold',
   },
 });
