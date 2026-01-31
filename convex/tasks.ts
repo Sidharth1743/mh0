@@ -81,24 +81,31 @@ export const addTaskItem = mutation({
 export const completePhase = mutation({
     args: { matchId: v.id("matches"), userId: v.id("users") },
     handler: async (ctx, args) => {
-        console.log(`[SERVER] Completing phase for match ${args.matchId}`);
-        const match = await ctx.db.get(args.matchId);
-        if (!match) throw new Error("Match not found");
+        console.log(`[SERVER] Completing phase for match ${args.matchId} by user ${args.userId}`);
 
-        await ctx.db.patch(args.matchId, {
-            matchLevel: (match.matchLevel || 1) + 1
-        });
-
-        // Clear tasks for next phase or handle phase transition
-        const tasks = await ctx.db
+        const task = await ctx.db
             .query("tasks")
             .withIndex("by_match", (q) => q.eq("matchId", args.matchId))
-            .collect();
+            .first();
 
-        for (const task of tasks) {
+        if (!task) throw new Error("Active task not found");
+
+        const completedByIds = task.completedByIds || [];
+        if (!completedByIds.includes(args.userId)) {
+            const nextCompletedByIds = [...completedByIds, args.userId];
             await ctx.db.patch(task._id, {
-                data: { items: [] } // Reset items for next phase in this simple model
+                completedByIds: nextCompletedByIds
             });
+
+            // Only transition match state when everyone is done
+            if (nextCompletedByIds.length === 2) {
+                const match = await ctx.db.get(args.matchId);
+                if (match) {
+                    await ctx.db.patch(args.matchId, {
+                        matchLevel: (match.matchLevel || 1) + 1
+                    });
+                }
+            }
         }
     },
 });

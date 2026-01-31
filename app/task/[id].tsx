@@ -110,6 +110,8 @@ export default function TaskScreen() {
     const resonancePulse = useSharedValue(0.8);
 
     // Derived Data from Convex
+    const activeTask = matchTasks?.[0];
+    const completedByIds = activeTask?.completedByIds || [];
     const taskCount = match?.matchLevel || 1;
     const revealed = match?.revealedUserIds?.length === 2;
     const items: TaskItem[] = matchTasks?.[0]?.data?.items?.map((item: any) => ({
@@ -163,22 +165,52 @@ export default function TaskScreen() {
     };
 
     const completeTask = async () => {
-        if (!userId) return;
+        if (!userId || isDone) return;
+
         setIsDone(true);
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+
         // Calculate scores for Decider if Level 2
         if (currentLevel === 2) {
             const scores = calculateDeciderScores();
             await updateDeciderScoresMut({ matchId: matchId as Id<"matches">, scores });
+        } else {
+            // For Level 1, we still want a shared resonance score
+            const sharedResonance = 75 + (parseInt(matchId?.substring(matchId.length - 2), 16) || 0) % 20;
+            await updateDeciderScoresMut({
+                matchId: matchId as Id<"matches">,
+                scores: { momentum: 80, resonance: sharedResonance, balance: 70 }
+            });
         }
-        await completePhaseMut({ matchId: matchId as Id<"matches">, userId });
 
-        // Show local score UX
-        const baseScore = 75;
-        const randomAdd = Math.floor(Math.random() * 20);
-        setScore(baseScore + randomAdd);
-        setShowScore(true);
-        setIsDone(false);
+        await completePhaseMut({ matchId: matchId as Id<"matches">, userId });
     };
+
+    const amIDone = userId ? completedByIds.includes(userId) : false;
+    const bothDone = completedByIds.length === 2;
+
+    // Shared Completion Observer
+    useEffect(() => {
+        setIsDone(false);
+        setShowScore(false);
+        setCurrentCardIndex(0);
+    }, [taskId, matchId]);
+
+    useEffect(() => {
+        if (!userId || !activeTask) return;
+
+        if (amIDone) {
+            setIsDone(true);
+        }
+
+        if (bothDone) {
+            const sharedScore = match?.deciderScores?.resonance || 85;
+            setScore(sharedScore);
+            setShowScore(true);
+        } else {
+            setShowScore(false);
+        }
+    }, [activeTask, amIDone, bothDone, userId, match?.deciderScores]);
 
     const calculateDeciderScores = () => {
         let momentum = 25;
@@ -437,10 +469,7 @@ export default function TaskScreen() {
                                     <Level3TaskHandler
                                         type={currentTask?.type!}
                                         options={currentTask?.options}
-                                        onComplete={() => {
-                                            Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-                                            setShowScore(true);
-                                        }}
+                                        onComplete={completeTask}
                                     />
                                 </View>
                             ) : currentTask?.type === 'ranking' ? (
@@ -763,7 +792,9 @@ export default function TaskScreen() {
                                             style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}
                                             entering={FadeInRight}
                                         >
-                                            <Text style={styles.doneText}>{isDone ? 'Syncing...' : isNoTypingTask ? "Shared Finish" : "Finish Phase together"}</Text>
+                                            <Text style={styles.doneText}>
+                                                {isDone ? (completedByIds.length === 1 ? 'Waiting for partner...' : 'Syncing Result...') : isNoTypingTask ? "Shared Finish" : "Finish Phase together"}
+                                            </Text>
                                             <CheckCircle2 size={18} color="#FFF" />
                                         </Animated.View>
                                     </TouchableOpacity>
@@ -785,7 +816,9 @@ export default function TaskScreen() {
                                     disabled={isDone}
                                     activeOpacity={0.8}
                                 >
-                                    <Text style={styles.floatingDoneText}>{isDone ? 'Syncing...' : 'Shared Finish'}</Text>
+                                    <Text style={styles.floatingDoneText}>
+                                        {isDone ? (completedByIds.length === 1 ? 'Waiting for partner...' : 'Syncing Result...') : 'Shared Finish'}
+                                    </Text>
                                     <CheckCircle2 size={20} color="#FFF" />
                                 </TouchableOpacity>
                             </Animated.View>
