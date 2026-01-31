@@ -955,6 +955,90 @@
                 "Be admired for something fake vs Ignored for something real",
                 "Have power vs Have peace"
             ]
+        },
+        {
+            "id": 201,
+            "level": 3,
+            "interest": "connection",
+            "energy": "high",
+            "duration": "5 min",
+            "title": "The Haptic Harmonic",
+            "description": "Keep your sliders aligned. Feel the rhythm of your partner's movement.",
+            "steps": 1,
+            "type": "sync_haptic",
+            "options": [],
+            "completion": "Maintain sync for 30s",
+            "whyEngaging": "Pure biological connection through rhythm"
+        },
+        {
+            "id": 202,
+            "level": 3,
+            "interest": "trust",
+            "energy": "medium",
+            "duration": "5 min",
+            "title": "The Pulse Compass",
+            "description": "One guides, one moves. Follow the haptic pulses to find the hidden star.",
+            "steps": 1,
+            "type": "pulse_compass",
+            "options": [],
+            "completion": "Target found",
+            "whyEngaging": "Builds reliance and non-verbal trust"
+        },
+        {
+            "id": 203,
+            "level": 3,
+            "interest": "values",
+            "energy": "medium",
+            "duration": "8 min",
+            "title": "The Third Option",
+            "description": "You disagreed before. Now build a 'Middle Ground' definition together.",
+            "steps": 3,
+            "type": "negotiate",
+            "options": [
+                {
+                    "label": "Full Honesty",
+                    "value": "A"
+                },
+                {
+                    "label": "Protect Feelings",
+                    "value": "B"
+                }
+            ],
+            "completion": "Consensus reached",
+            "whyEngaging": "Intellectual alignment and compromise"
+        },
+        {
+            "id": 204,
+            "level": 3,
+            "interest": "creative",
+            "energy": "medium",
+            "duration": "6 min",
+            "title": "The Shared Mosaic",
+            "description": "A 4x4 grid. You only see your neighbor's blocks. Build a pattern together.",
+            "steps": 16,
+            "type": "mosaic",
+            "options": [
+                "#3B82F6",
+                "#F472B6",
+                "#10B981",
+                "#F59E0B"
+            ],
+            "completion": "Grid filled",
+            "whyEngaging": "Shared aesthetic vision"
+        },
+        {
+            "id": 205,
+            "level": 3,
+            "interest": "music",
+            "energy": "high",
+            "duration": "5 min",
+            "title": "The Echo Sequence",
+            "description": "Repeat the rhythm. Add a beat. Build a shared song.",
+            "steps": 5,
+            "type": "echo_sequence",
+            "options": [],
+            "completion": "Sequence length 8 reached",
+            "whyEngaging": "Inside jokes formed through sound"
         }
     ]
 }
