@@ -1,6 +1,19 @@
+import { useBuddyAnimations } from '@/hooks/useBuddyAnimations';
 import * as Haptics from 'expo-haptics';
 import { useRouter } from 'expo-router';
-import { Check, Sparkles } from 'lucide-react-native';
+import {
+    Check,
+    Cpu,
+    Dumbbell,
+    Film,
+    Gamepad,
+    Leaf,
+    Music,
+    Palette,
+    Plane,
+    Sparkles,
+    Utensils
+} from 'lucide-react-native';
 import { useState } from 'react';
 import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import Animated, {
@@ -12,19 +25,17 @@ import { BuddyTheme } from '../../constants/BuddyTheme';
 import { useOnboarding } from './_layout';
 
 const INTERESTS = [
-    { label: 'Music', teaser: 'Ready for collaborative playlists? 🎧' },
-    { label: 'Fitness', teaser: 'Find a virtual training partner! 🏋️' },
-    { label: 'Software', teaser: 'Riddle battles for logic masters.' },
-    { label: 'Literature', teaser: 'Co-curate the ultimate reading list.' },
-    { label: 'Culinary', teaser: 'Trade secret ingredients.' },
-    { label: 'Gaming', teaser: 'Riddle battles & strategy duos.' },
-    { label: 'Cinema', teaser: 'Debate the best plot twists.' },
-    { label: 'Exploration', teaser: 'Virtual scavenger hunts await.' },
-    { label: 'Design', teaser: 'Moodboard collabs starting soon.' },
-    { label: 'Science', teaser: 'Solve mystery experiments.' }
+    { id: 'lifestyle', label: 'Lifestyle', icon: Sparkles, color: '#FF6B6B', teaser: 'Ready for collaborative playlists? 🎧' },
+    { id: 'music', label: 'Music', icon: Music, color: '#4ECDC4', teaser: 'Discover shared beats.' },
+    { id: 'tech', label: 'Tech & AI', icon: Cpu, color: '#45B7D1', teaser: 'Riddle battles for logic masters.' },
+    { id: 'gaming', label: 'Gaming', icon: Gamepad, color: '#96CEB4', teaser: 'Strategy duos & rapid fire.' },
+    { id: 'fitness', label: 'Fitness', icon: Dumbbell, color: '#FFEEAD', teaser: 'Find a virtual training partner!' },
+    { id: 'art', label: 'Art & Design', icon: Palette, color: '#D4A5A5', teaser: 'Co-curate the ultimate moodboard.' },
+    { id: 'nature', label: 'Nature', icon: Leaf, color: '#9B59B6', teaser: 'Scavenger hunts for explorers.' },
+    { id: 'food', label: 'Food', icon: Utensils, color: '#3498DB', teaser: 'Trade secret ingredients.' },
+    { id: 'travel', label: 'Travel', icon: Plane, color: '#E67E22', teaser: 'Bucket list sorting.' },
+    { id: 'movies', label: 'Movies', icon: Film, color: '#2ECC71', teaser: 'Debate the best plot twists.' }
 ];
-
-import { useBuddyAnimations } from '@/hooks/useBuddyAnimations';
 
 export default function InterestsScreen() {
     const [selected, setSelected] = useState<string[]>([]);
@@ -70,10 +81,14 @@ export default function InterestsScreen() {
                                 activeOpacity={0.7}
                                 style={[
                                     styles.chip,
-                                    selected.includes(interest.label) && styles.chipSelected
+                                    selected.includes(interest.label) && styles.chipSelected,
+                                    { borderLeftColor: interest.color, borderLeftWidth: 4 }
                                 ]}
                                 onPress={() => toggleInterest(interest)}
                             >
+                                <View style={[styles.iconBox, { backgroundColor: interest.color + '15' }]}>
+                                    <interest.icon size={18} color={selected.includes(interest.label) ? '#FFF' : interest.color} />
+                                </View>
                                 <Text style={[
                                     styles.chipText,
                                     selected.includes(interest.label) && styles.chipTextSelected
@@ -82,7 +97,7 @@ export default function InterestsScreen() {
                                 </Text>
                                 {selected.includes(interest.label) && (
                                     <View style={styles.checkWrapper}>
-                                        <Check size={14} color="#fff" strokeWidth={3} />
+                                        <Check size={12} color="#fff" strokeWidth={4} />
                                     </View>
                                 )}
                             </TouchableOpacity>
@@ -175,12 +190,16 @@ const styles = StyleSheet.create({
         backgroundColor: BuddyTheme.colors.surface,
     },
     chipSelected: {
-        backgroundColor: BuddyTheme.colors.secondary,
-        borderColor: BuddyTheme.colors.secondary,
-        shadowColor: BuddyTheme.colors.secondary,
-        shadowOpacity: 0.2,
-        shadowRadius: 8,
-        elevation: 4,
+        backgroundColor: BuddyTheme.colors.primary,
+        borderColor: BuddyTheme.colors.primary,
+    },
+    iconBox: {
+        width: 32,
+        height: 32,
+        borderRadius: 10,
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginRight: 10,
     },
     chipText: {
         color: BuddyTheme.colors.textPrimary,

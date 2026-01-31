@@ -1,7 +1,7 @@
 import * as Haptics from 'expo-haptics';
 import { useRouter } from 'expo-router';
 import { ArrowRight, Hammer, Shield, Sparkles, Users } from 'lucide-react-native';
-import React, { useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import { Dimensions, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import Animated, {
     Extrapolate,
@@ -81,75 +81,80 @@ export default function ValuePropScreen() {
 
     return (
         <SafeAreaView style={styles.container}>
-            <View style={styles.header}>
-                <Text style={styles.title}>The TaskFriends Way</Text>
-            </View>
-
-            <View style={styles.carouselContainer}>
-                <ScrollView
-                    horizontal
-                    pagingEnabled
-                    showsHorizontalScrollIndicator={false}
-                    onScroll={handleScroll}
-                    scrollEventThrottle={16}
-                    style={styles.scroll}
-                >
-                    {CARDS.map((card, index) => (
-                        <View key={index} style={styles.cardWrapper}>
-                            <View style={[styles.card, { backgroundColor: BuddyTheme.colors.surface }]}>
-                                <View style={[styles.iconContainer, { backgroundColor: card.accent }]}>
-                                    <card.icon size={42} color={card.type === 'old' ? '#64748B' : BuddyTheme.colors.secondary} />
-                                </View>
-                                <Text style={[styles.cardTitle, card.type === 'old' && { color: '#64748B' }]}>{card.title}</Text>
-                                <Text style={styles.cardDesc}>{card.desc}</Text>
-                                {card.teaser && (
-                                    <View style={styles.teaserBadge}>
-                                        <Text style={styles.teaserText}>{card.teaser}</Text>
-                                    </View>
-                                )}
-                            </View>
-                        </View>
-                    ))}
-                </ScrollView>
-
-                {/* Parallax Fox Silhouette Background Motif */}
-                <Animated.View style={[styles.parallaxFox, foxAnimatedStyle]} pointerEvents="none">
-                    <Image
-                        source={require('@/assets/images/buddy.png')}
-                        style={styles.foxImage}
-                        resizeMode="contain"
-                    />
-                </Animated.View>
-            </View>
-
-            <View style={styles.footer}>
-                <View style={styles.pagination}>
-                    {CARDS.map((_, i) => (
-                        <View
-                            key={i}
-                            style={[
-                                styles.dot,
-                                activeTab === i ? styles.dotActive : null
-                            ]}
-                        />
-                    ))}
+            <ScrollView
+                showsVerticalScrollIndicator={false}
+                contentContainerStyle={styles.contentContainer}
+            >
+                <View style={styles.header}>
+                    <Text style={styles.title}>The TaskFriends Way</Text>
                 </View>
 
-                <TouchableOpacity
-                    style={[
-                        styles.button,
-                        activeTab < CARDS.length - 1 && styles.buttonDimmed
-                    ]}
-                    onPress={goNext}
-                    disabled={activeTab < CARDS.length - 1}
-                    activeOpacity={0.8}
-                >
-                    <Text style={styles.buttonText}>
-                        {activeTab === CARDS.length - 1 ? "Pick My Interests" : "Swipe to Continue"}
-                    </Text>
-                    {activeTab === CARDS.length - 1 && <ArrowRight size={20} color="#FFF" style={{ marginLeft: 8 }} />}
-                </TouchableOpacity>
-            </View>
+                <View style={styles.carouselContainer}>
+                    <ScrollView
+                        horizontal
+                        pagingEnabled
+                        showsHorizontalScrollIndicator={false}
+                        onScroll={handleScroll}
+                        scrollEventThrottle={16}
+                        style={styles.scroll}
+                    >
+                        {CARDS.map((card, index) => (
+                            <View key={index} style={styles.cardWrapper}>
+                                <View style={[styles.card, { backgroundColor: BuddyTheme.colors.surface }]}>
+                                    <View style={[styles.iconContainer, { backgroundColor: card.accent }]}>
+                                        <card.icon size={42} color={card.type === 'old' ? '#64748B' : BuddyTheme.colors.secondary} />
+                                    </View>
+                                    <Text style={[styles.cardTitle, card.type === 'old' && { color: '#64748B' }]}>{card.title}</Text>
+                                    <Text style={styles.cardDesc}>{card.desc}</Text>
+                                    {card.teaser && (
+                                        <View style={styles.teaserBadge}>
+                                            <Text style={styles.teaserText}>{card.teaser}</Text>
+                                        </View>
+                                    )}
+                                </View>
+                            </View>
+                        ))}
+                    </ScrollView>
+
+                    {/* Parallax Fox Silhouette Background Motif */}
+                    <Animated.View style={[styles.parallaxFox, foxAnimatedStyle]} pointerEvents="none">
+                        <Image
+                            source={require('@/assets/images/buddy.png')}
+                            style={styles.foxImage}
+                            resizeMode="contain"
+                        />
+                    </Animated.View>
+                </View>
+
+                <View style={styles.footer}>
+                    <View style={styles.pagination}>
+                        {CARDS.map((_, i) => (
+                            <View
+                                key={i}
+                                style={[
+                                    styles.dot,
+                                    activeTab === i ? styles.dotActive : null
+                                ]}
+                            />
+                        ))}
+                    </View>
+
+                    <TouchableOpacity
+                        style={[
+                            styles.button,
+                            activeTab < CARDS.length - 1 && styles.buttonDimmed
+                        ]}
+                        onPress={goNext}
+                        disabled={activeTab < CARDS.length - 1}
+                        activeOpacity={0.8}
+                    >
+                        <Text style={styles.buttonText}>
+                            {activeTab === CARDS.length - 1 ? "Pick My Interests" : "Swipe to Continue"}
+                        </Text>
+                        {activeTab === CARDS.length - 1 && <ArrowRight size={20} color="#FFF" style={{ marginLeft: 8 }} />}
+                    </TouchableOpacity>
+                </View>
+            </ScrollView>
         </SafeAreaView>
     );
 }
@@ -170,8 +175,11 @@ const styles = StyleSheet.create({
         color: BuddyTheme.colors.primary,
         letterSpacing: -1,
     },
+    contentContainer: {
+        flexGrow: 1,
+    },
     carouselContainer: {
-        flex: 1,
+        height: 550,
     },
     scroll: {
         flex: 1,

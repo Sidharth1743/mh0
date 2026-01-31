@@ -20,7 +20,12 @@ export default defineSchema({
     status: v.string(), // "active", "completed", "cancelled"
     activeTaskId: v.optional(v.id("tasks")),
     matchLevel: v.number(),
-    revealedUserIds: v.array(v.id("users")), // tracks who agreed to reveal
+    revealedUserIds: v.array(v.id("users")),
+    deciderScores: v.optional(v.object({
+      momentum: v.number(),
+      resonance: v.number(),
+      balance: v.number(),
+    })),
   }),
 
   tasks: defineTable({

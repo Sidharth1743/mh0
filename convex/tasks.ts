@@ -102,3 +102,194 @@ export const completePhase = mutation({
         }
     },
 });
+
+export const initializeTask = mutation({
+    args: {
+        matchId: v.id("matches"),
+        taskId: v.string(),
+        type: v.string(),
+        title: v.string(),
+        items: v.array(v.object({
+            id: v.string(),
+            text: v.string(),
+            userId: v.optional(v.string()),
+            timestamp: v.optional(v.union(v.string(), v.number())),
+            selected: v.optional(v.boolean())
+        }))
+    },
+    handler: async (ctx, args) => {
+        const oldTasks = await ctx.db
+            .query("tasks")
+            .withIndex("by_match", (q) => q.eq("matchId", args.matchId))
+            .collect();
+
+        for (const t of oldTasks) {
+            await ctx.db.delete(t._id);
+        }
+
+        await ctx.db.insert("tasks", {
+            matchId: args.matchId,
+            type: args.type,
+            title: args.title,
+            description: "",
+            data: { items: args.items },
+            completedByIds: [],
+        });
+    }
+});
+
+export const toggleTaskItem = mutation({
+    args: { matchId: v.id("matches"), itemId: v.string(), userId: v.id("users") },
+    handler: async (ctx, args) => {
+        const task = await ctx.db
+            .query("tasks")
+            .withIndex("by_match", (q) => q.eq("matchId", args.matchId))
+            .first();
+
+        if (task) {
+            const items = task.data?.items || [];
+            const updatedItems = items.map((item: any) =>
+                item.id === args.itemId ? { ...item, selected: !item.selected, lastSelectedBy: args.userId } : item
+            );
+            await ctx.db.patch(task._id, {
+                data: { ...task.data, items: updatedItems }
+            });
+        }
+    }
+});
+
+export const updateDeciderScores = mutation({
+    args: {
+        matchId: v.id("matches"),
+        scores: v.object({
+            momentum: v.number(),
+            resonance: v.number(),
+            balance: v.number(),
+        })
+    },
+    handler: async (ctx, args) => {
+        await ctx.db.patch(args.matchId, {
+            deciderScores: args.scores
+        });
+    }
+});
+
+export const updateShowdownSelection = mutation({
+    args: {
+        matchId: v.id("matches"),
+        userId: v.id("users"),
+        cardIndex: v.number(),
+        choice: v.string(),
+    },
+    handler: async (ctx, args) => {
+        const task = await ctx.db
+            .query("tasks")
+            .withIndex("by_match", (q) => q.eq("matchId", args.matchId))
+            .first();
+
+        if (task) {
+            const showdownData = task.data?.showdown || {};
+            const cardData = showdownData[args.cardIndex] || {};
+            cardData[args.userId] = args.choice;
+
+            await ctx.db.patch(task._id, {
+                data: {
+                    ...task.data,
+                    showdown: {
+                        ...showdownData,
+                        [args.cardIndex]: cardData
+                    }
+                }
+            });
+        }
+    }
+});
+
+export const updateSortingSelection = mutation({
+    args: {
+        matchId: v.id("matches"),
+        userId: v.id("users"),
+        itemId: v.string(),
+        category: v.string(),
+    },
+    handler: async (ctx, args) => {
+        const task = await ctx.db
+            .query("tasks")
+            .withIndex("by_match", (q) => q.eq("matchId", args.matchId))
+            .first();
+
+        if (task) {
+            const sortingData = task.data?.sorting || {};
+            const itemData = sortingData[args.itemId] || {};
+            itemData[args.userId] = args.category;
+
+            await ctx.db.patch(task._id, {
+                data: {
+                    ...task.data,
+                    sorting: {
+                        ...sortingData,
+                        [args.itemId]: itemData
+                    }
+                }
+            });
+        }
+    }
+});
+
+export const updateRankingOrder = mutation({
+    args: {
+        matchId: v.id("matches"),
+        userId: v.id("users"),
+        itemIds: v.array(v.string()),
+    },
+    handler: async (ctx, args) => {
+        const task = await ctx.db
+            .query("tasks")
+            .withIndex("by_match", (q) => q.eq("matchId", args.matchId))
+            .first();
+
+        if (task) {
+            const rankingData = task.data?.ranking || {};
+            await ctx.db.patch(task._id, {
+                data: {
+                    ...task.data,
+                    ranking: {
+                        ...rankingData,
+                        [args.userId]: args.itemIds
+                    }
+                }
+            });
+        }
+    }
+});
+
+export const updateBinaryChoice = mutation({
+    args: {
+        matchId: v.id("matches"),
+        userId: v.id("users"),
+        itemId: v.string(),
+        choice: v.string(),
+    },
+    handler: async (ctx, args) => {
+        const task = await ctx.db
+            .query("tasks")
+            .withIndex("by_match", (q) => q.eq("matchId", args.matchId))
+            .first();
+
+        if (task) {
+            const binaryData = task.data?.binary || {};
+            const itemData = binaryData[args.itemId] || {};
+            itemData[args.userId] = args.choice;
+
+            await ctx.db.patch(task._id, {
+                data: {
+                    ...task.data,
+                    binary: {
+                        ...binaryData,
+                        [args.itemId]: itemData
+                    }
+                }
+            });
+        }
+    }
+});

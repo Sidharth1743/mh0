@@ -6,7 +6,7 @@ import { useMutation } from 'convex/react';
 import * as Haptics from 'expo-haptics';
 import { useRouter } from 'expo-router';
 import { useEffect } from 'react';
-import { Image, Pressable, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Image, Pressable, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import Animated, {
     FadeIn,
     FadeInDown,
@@ -89,7 +89,10 @@ export default function WelcomeScreen() {
                 <PulsingLine style={{ bottom: '30%', left: '20%', width: 80, transform: [{ rotate: '80deg' }] }} />
             </View>
 
-            <View style={styles.content}>
+            <ScrollView
+                contentContainerStyle={styles.content}
+                showsVerticalScrollIndicator={false}
+            >
                 <View style={styles.topSection}>
                     <Animated.View entering={FadeInDown.delay(200)}>
                         <Text style={styles.headline}>TaskFriends</Text>
@@ -138,7 +141,7 @@ export default function WelcomeScreen() {
                         <Text style={styles.buttonText}>Dive In – No Small Talk Needed</Text>
                     </TouchableOpacity>
                 </Animated.View>
-            </View>
+            </ScrollView>
         </SafeAreaView>
     );
 }
@@ -154,7 +157,7 @@ const styles = StyleSheet.create({
         backgroundColor: BuddyTheme.colors.secondary,
     },
     content: {
-        flex: 1,
+        flexGrow: 1,
         paddingHorizontal: 32,
         paddingBottom: 40,
         justifyContent: 'space-between',

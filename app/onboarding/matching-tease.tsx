@@ -6,15 +6,7 @@ import * as Haptics from 'expo-haptics';
 import { useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import Animated, {
-    FadeInUp,
-    ZoomIn,
-    useAnimatedStyle,
-    useSharedValue,
-    withRepeat,
-    withSequence,
-    withTiming
-} from 'react-native-reanimated';
+import Animated, { FadeInUp, ZoomIn, useAnimatedStyle, useSharedValue, withRepeat, withSequence, withTiming } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { BuddyTheme } from '../../constants/BuddyTheme';
 import { useOnboarding } from './_layout';
@@ -22,9 +14,9 @@ import { useOnboarding } from './_layout';
 const FUN_FACTS = [
     "80% of users complete their first task in <10 min",
     "Most matches happen in under 30 seconds",
-    "First collab incoming! 💎",
-    "Calculating wavelength overlap...",
-    "Synchronizing puzzle pieces..."
+    "Establishing core focus...",
+    "Syncing group wavelength...",
+    "Nodes aligning..."
 ];
 
 export default function MatchingTeaseScreen() {
@@ -37,75 +29,52 @@ export default function MatchingTeaseScreen() {
     // Convex Mutations/Queries
     const updateUserPrefs = useMutation(api.users.updateUserPrefs);
     const findMatch = useMutation(api.users.findMatch);
+    const cancelAllMatches = useMutation(api.users.cancelAllActiveMatches);
 
-    // Watch for match!
-    const [matchDetails, setMatchDetails] = useState<Id<"matches"> | null>(null);
     const [myUserId, setMyUserId] = useState<Id<"users"> | null>(null);
     const [readyToListen, setReadyToListen] = useState(false);
 
-    // Only query for matches once we have cleaned up old ones
+    // Watch for real-time match!
     const activeMatchId = useQuery(api.users.getMyMatch, (myUserId && readyToListen) ? { userId: myUserId } : "skip");
 
     useEffect(() => {
-        if (activeMatchId) {
-            console.log('Real-time match detected:', activeMatchId);
-            setMatchDetails(activeMatchId);
+        if (activeMatchId && !complete) {
             setComplete(true);
             Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+            // Delay for UX success state
         }
-    }, [activeMatchId, readyToListen]);
-
-    const cancelAllMatches = useMutation(api.users.cancelAllActiveMatches);
+    }, [activeMatchId]);
 
     const performMatching = async () => {
         try {
-            console.log('Beginning matching process...');
-            // 1. Get the userId we created in index.tsx
             const userIdStr = await AsyncStorage.getItem('convex_user_id');
-            console.log('Retrieved stored User ID:', userIdStr);
-
             if (!userIdStr) {
-                console.error('CRITICAL: No Convex User ID found in storage');
                 router.replace('/onboarding');
                 return;
             }
             const userId = userIdStr as Id<"users">;
             setMyUserId(userId);
-            console.log('Listening for matches for user:', userId);
 
-            // 0. RESET STATE: Cancel/End any old matches to avoid stale "resumes"
-            // If the user hit "Dive In", they want a FRESH match, not an old one.
-            console.log('Cleaning up old sessions...');
+            // Cleanup old sessions and start fresh
             await cancelAllMatches({ userId });
-            console.log('Old sessions cleaned. Ready to listen for new matches.');
             setReadyToListen(true);
 
-            // 2. Update prefs (This puts them in the "Matching Pool", isMatching=true)
-            console.log('Updating user preferences...');
+            // Update prefs to enter pool
             await updateUserPrefs({
                 userId,
                 interests: data.interests,
                 energyLevel: data.vibe || 'medium',
                 availability: data.availability || 'today'
             });
-            console.log('User preferences updated.');
 
-            // 3. Try to find Match proactively
-            console.log('Attempting to find a match proactively...');
+            // Try to find a match proactively
             const foundMatchId = await findMatch({ userId });
-            console.log('Find Match Result:', foundMatchId);
-
             if (foundMatchId) {
-                console.log('Match found immediately/proactively!', foundMatchId);
-                setMatchDetails(foundMatchId);
                 setComplete(true);
                 Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-            } else {
-                console.log('No immediate match. Entering waiting mode...');
             }
-
         } catch (e) {
-            console.error('Matching process encountered an error:', e);
+            console.error('Matching error:', e);
         }
     };
 
@@ -149,7 +118,7 @@ export default function MatchingTeaseScreen() {
                         <View style={styles.circle}>
                             <ActivityIndicator size="large" color={BuddyTheme.colors.secondary} />
                         </View>
-                        <Text style={styles.title}>Finding Your Perfect Task Co-Pilot...</Text>
+                        <Text style={styles.title}>Establishing shared focus...</Text>
                         <Animated.View key={factIndex} entering={FadeInUp} style={styles.factWrapper}>
                             <Text style={styles.factText}>{FUN_FACTS[factIndex]}</Text>
                         </Animated.View>
@@ -162,23 +131,20 @@ export default function MatchingTeaseScreen() {
                             </Animated.View>
                         </View>
 
-                        <Text style={styles.boomTitle}>Boom! Matched.</Text>
+                        <Text style={styles.boomTitle}>Shared thread found.</Text>
                         <Text style={styles.subtitle}>
-                            Matched with a mystery partner who shares your vibe. Ready to start your first collab?
+                            Found nodes with similar focus and energy. Connection grows through shared execution. Ready for your first group task?
                         </Text>
 
                         <TouchableOpacity
                             style={styles.button}
-                            onPress={() => {
-                                if (matchDetails) {
-                                    router.replace(`/task/${matchDetails}`);
-                                } else {
-                                    router.replace('/(tabs)');
-                                }
-                            }}
+                            onPress={() => router.replace({
+                                pathname: '/onboarding/task-select' as any,
+                                params: { matchId: activeMatchId as string }
+                            })}
                             activeOpacity={0.8}
                         >
-                            <Text style={styles.buttonText}>Jump Into First Task</Text>
+                            <Text style={styles.buttonText}>Start group task</Text>
                         </TouchableOpacity>
                     </Animated.View>
                 )}
@@ -202,122 +168,55 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     circle: {
-        width: 140,
-        height: 140,
-        borderRadius: 70,
+        width: 140, height: 140, borderRadius: 70,
         backgroundColor: BuddyTheme.colors.surface,
-        justifyContent: 'center',
-        alignItems: 'center',
+        justifyContent: 'center', alignItems: 'center',
         marginBottom: 40,
-        shadowColor: '#000',
-        shadowOpacity: 0.1,
-        shadowRadius: 20,
-        elevation: 8,
-        borderWidth: 2,
-        borderColor: BuddyTheme.colors.border,
+        shadowColor: '#000', shadowOpacity: 0.1, shadowRadius: 20, elevation: 8,
+        borderWidth: 2, borderColor: BuddyTheme.colors.border,
     },
     title: {
-        fontSize: 30,
-        fontWeight: 'bold',
-        color: BuddyTheme.colors.primary,
-        textAlign: 'center',
-        marginBottom: 24,
-        letterSpacing: -0.5,
+        fontSize: 30, fontWeight: 'bold', color: BuddyTheme.colors.primary,
+        textAlign: 'center', marginBottom: 24, letterSpacing: -0.5,
     },
     factWrapper: {
         backgroundColor: 'rgba(38, 166, 154, 0.08)',
-        paddingHorizontal: 20,
-        paddingVertical: 12,
-        borderRadius: 16,
+        paddingHorizontal: 20, paddingVertical: 12, borderRadius: 16,
     },
     factText: {
-        color: BuddyTheme.colors.secondary,
-        fontWeight: '700',
-        fontSize: 15,
-        textAlign: 'center',
+        color: BuddyTheme.colors.secondary, fontWeight: '700', fontSize: 15, textAlign: 'center',
     },
-    completeWrapper: {
-        alignItems: 'center',
-        width: '100%',
-    },
-    successContainer: {
-        marginBottom: 32,
-    },
+    completeWrapper: { alignItems: 'center', width: '100%' },
+    successContainer: { marginBottom: 32 },
     particleCircle: {
-        width: 140,
-        height: 140,
-        borderRadius: 70,
+        width: 140, height: 140, borderRadius: 70,
         backgroundColor: BuddyTheme.colors.secondary,
-        justifyContent: 'center',
-        alignItems: 'center',
-        shadowColor: BuddyTheme.colors.secondary,
-        shadowOpacity: 0.4,
-        shadowRadius: 20,
-        elevation: 10,
+        justifyContent: 'center', alignItems: 'center',
+        shadowColor: BuddyTheme.colors.secondary, shadowOpacity: 0.4, shadowRadius: 20, elevation: 10,
     },
-    successFox: {
-        width: 80,
-        height: 80,
-        tintColor: '#FFF',
-    },
+    successFox: { width: 80, height: 80, tintColor: '#FFF' },
     boomTitle: {
-        fontSize: 40,
-        fontWeight: '900',
-        color: BuddyTheme.colors.primary,
-        textAlign: 'center',
-        marginBottom: 16,
-        letterSpacing: -1,
+        fontSize: 40, fontWeight: '900', color: BuddyTheme.colors.primary,
+        textAlign: 'center', marginBottom: 16, letterSpacing: -1,
     },
     subtitle: {
-        fontSize: 18,
-        color: BuddyTheme.colors.textSecondary,
-        textAlign: 'center',
-        lineHeight: 28,
+        fontSize: 18, color: BuddyTheme.colors.textSecondary,
+        textAlign: 'center', lineHeight: 28,
     },
     button: {
         backgroundColor: BuddyTheme.colors.primary,
-        paddingVertical: 22,
-        paddingHorizontal: 48,
-        borderRadius: BuddyTheme.borderRadius.lg,
-        alignItems: 'center',
-        marginTop: 60,
-        width: '100%',
-        shadowColor: BuddyTheme.colors.primary,
-        shadowOpacity: 0.3,
-        shadowRadius: 15,
-        elevation: 10,
+        paddingVertical: 22, paddingHorizontal: 48, borderRadius: BuddyTheme.borderRadius.lg,
+        alignItems: 'center', marginTop: 60, width: '100%',
+        shadowColor: BuddyTheme.colors.primary, shadowOpacity: 0.3, shadowRadius: 15, elevation: 10,
     },
-    buttonText: {
-        color: BuddyTheme.colors.surface,
-        fontSize: 18,
-        fontWeight: '900',
-    },
+    buttonText: { color: BuddyTheme.colors.surface, fontSize: 18, fontWeight: '900' },
     onlineBadge: {
-        position: 'absolute',
-        top: 60, // Below status bar
-        left: 24,
-        flexDirection: 'row',
-        alignItems: 'center',
-        backgroundColor: 'rgba(255,255,255,0.9)', // More opaque for visibility
-        paddingHorizontal: 12,
-        paddingVertical: 8,
-        borderRadius: 20,
-        zIndex: 100, // Higher z-index
-        shadowColor: '#000',
-        shadowOpacity: 0.1,
-        shadowRadius: 4,
-        elevation: 5,
+        position: 'absolute', top: 60, left: 24,
+        flexDirection: 'row', alignItems: 'center',
+        backgroundColor: 'rgba(255,255,255,0.9)',
+        paddingHorizontal: 12, paddingVertical: 8, borderRadius: 20,
+        zIndex: 100, shadowColor: '#000', shadowOpacity: 0.1, shadowRadius: 4, elevation: 5,
     },
-    onlineDot: {
-        width: 8,
-        height: 8,
-        borderRadius: 4,
-        backgroundColor: '#4ADE80',
-        marginRight: 8,
-    },
-    onlineText: {
-        fontSize: 13,
-        fontWeight: '700',
-        color: BuddyTheme.colors.textSecondary,
-    },
+    onlineDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: '#4ADE80', marginRight: 8 },
+    onlineText: { fontSize: 13, fontWeight: '700', color: BuddyTheme.colors.textSecondary },
 });

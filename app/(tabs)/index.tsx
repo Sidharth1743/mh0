@@ -1,7 +1,7 @@
 import { api } from '@/convex/_generated/api';
 import { Id } from '@/convex/_generated/dataModel';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useMutation } from 'convex/react';
+import { useMutation, useQuery } from 'convex/react';
 import { useRouter } from 'expo-router';
 import { Layout, Shield, Zap } from 'lucide-react-native';
 import { useEffect, useState } from 'react';
@@ -18,6 +18,8 @@ export default function TabOneScreen() {
   // Convex
   const findMatchMut = useMutation(api.users.findMatch);
   const updateUserPrefsMut = useMutation(api.users.updateUserPrefs);
+  const activeMatchId = useQuery(api.users.getMyMatch, userId ? { userId } : "skip");
+  const activeMatch = useQuery(api.users.getMatch, activeMatchId ? { matchId: activeMatchId } : "skip");
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -59,6 +61,32 @@ export default function TabOneScreen() {
       setIsMatching(false);
     }
   };
+
+  if (activeMatch) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <View style={styles.matchContent}>
+          <Animated.View entering={FadeIn} style={styles.matchCard}>
+            <Text style={styles.matchLabel}>SHARED FOCUS</Text>
+            <Text style={styles.matchTitle}>Nodes active</Text>
+            <Text style={styles.matchSubtitle}>Establishing a shared workspace with Participant #{activeMatch._id.toString().slice(-2)}</Text>
+
+            <View style={styles.commonContainer}>
+              <Text style={styles.commonText}>Shared focus: Literature, Technology</Text>
+            </View>
+
+            <TouchableOpacity
+              activeOpacity={0.8}
+              style={styles.taskButton}
+              onPress={() => router.push(`/task/${activeMatch._id}`)}
+            >
+              <Text style={styles.buttonText}>Start group task</Text>
+            </TouchableOpacity>
+          </Animated.View>
+        </View>
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView style={styles.container}>
