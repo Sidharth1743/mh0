@@ -17,9 +17,9 @@ import { BuddyTheme } from '../../constants/BuddyTheme';
 const FUN_FACTS = [
     "80% of users complete their first task in <10 min",
     "Most matches happen in under 30 seconds",
-    "First collab incoming! 💎",
-    "Calculating wavelength overlap...",
-    "Synchronizing puzzle pieces..."
+    "Establishing core focus...",
+    "Syncing group wavelength...",
+    "Nodes aligning..."
 ];
 
 export default function MatchingTeaseScreen() {
@@ -80,7 +80,7 @@ export default function MatchingTeaseScreen() {
                         <View style={styles.circle}>
                             <ActivityIndicator size="large" color={BuddyTheme.colors.secondary} />
                         </View>
-                        <Text style={styles.title}>Finding Your Perfect Task Co-Pilot...</Text>
+                        <Text style={styles.title}>Establishing shared focus...</Text>
                         <Animated.View key={factIndex} entering={FadeInUp} style={styles.factWrapper}>
                             <Text style={styles.factText}>{FUN_FACTS[factIndex]}</Text>
                         </Animated.View>
@@ -93,9 +93,9 @@ export default function MatchingTeaseScreen() {
                             </Animated.View>
                         </View>
 
-                        <Text style={styles.boomTitle}>Boom! Matched.</Text>
+                        <Text style={styles.boomTitle}>Shared thread found.</Text>
                         <Text style={styles.subtitle}>
-                            Matched with a mystery partner who shares your vibe. Ready to start your first collab?
+                            Found nodes with similar focus and energy. Connection grows through shared execution. Ready for your first group task?
                         </Text>
 
                         <TouchableOpacity
@@ -110,7 +110,7 @@ export default function MatchingTeaseScreen() {
                             }}
                             activeOpacity={0.8}
                         >
-                            <Text style={styles.buttonText}>Initializing First Collab...</Text>
+                            <Text style={styles.buttonText}>Start group task</Text>
                         </TouchableOpacity>
                     </Animated.View>
                 )}

@@ -55,9 +55,9 @@ export default function VibeScreen() {
                 contentContainerStyle={styles.content}
             >
                 <Animated.View entering={FadeInDown.delay(200)} style={styles.header}>
-                    <Text style={styles.title}>Match Your Energy</Text>
+                    <Text style={styles.title}>Match Energy Style</Text>
                     <Text style={styles.subtitle}>
-                        We pair similar vibes so tasks flow smoothly. Low = chill votes. High = creative chaos.
+                        Shared energy makes coordination smoother. Tasks flow best when groups start on the same temporary wavelength.
                     </Text>
                 </Animated.View>
 
@@ -120,7 +120,7 @@ export default function VibeScreen() {
                             disabled={!selected}
                             onPress={() => router.push('/onboarding/availability')}
                         >
-                            <Text style={styles.buttonText}>Next: When You're Free</Text>
+                            <Text style={styles.buttonText}>Next: Coordination Timing</Text>
                         </TouchableOpacity>
                     </Animated.View>
                 </View>

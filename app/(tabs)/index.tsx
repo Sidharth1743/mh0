@@ -24,9 +24,9 @@ export default function TabOneScreen() {
       <SafeAreaView style={styles.container}>
         <View style={styles.matchContent}>
           <Animated.View entering={FadeIn} style={styles.matchCard}>
-            <Text style={styles.matchLabel}>ACTIVE PARTNERSHIP</Text>
-            <Text style={styles.matchTitle}>Session Established</Text>
-            <Text style={styles.matchSubtitle}>You are matched with Participant #17</Text>
+            <Text style={styles.matchLabel}>SHARED FOCUS</Text>
+            <Text style={styles.matchTitle}>Nodes active</Text>
+            <Text style={styles.matchSubtitle}>Establishing a shared workspace with Participant #17</Text>
 
             <View style={styles.commonContainer}>
               <Text style={styles.commonText}>Shared focus: Literature, Technology</Text>
@@ -37,7 +37,7 @@ export default function TabOneScreen() {
               style={styles.taskButton}
               onPress={() => router.push('/task/101')}
             >
-              <Text style={styles.buttonText}>Collaborate on Level 1 Task</Text>
+              <Text style={styles.buttonText}>Start group task</Text>
             </TouchableOpacity>
           </Animated.View>
         </View>
@@ -59,17 +59,17 @@ export default function TabOneScreen() {
         {isMatching ? (
           <Animated.View entering={FadeIn} exiting={FadeOut} style={styles.matchingState}>
             <ActivityIndicator size="large" color={BuddyTheme.colors.secondary} />
-            <Text style={styles.matchingText}>Synchronizing nodes...</Text>
-            <Text style={styles.matchingSubtext}>Finding a partner within your wavelength.</Text>
+            <Text style={styles.matchingText}>Searching for shared focus...</Text>
+            <Text style={styles.matchingSubtext}>People connect by doing. Finding a collaborative match...</Text>
           </Animated.View>
         ) : (
           <Animated.View entering={FadeIn} style={styles.idleState}>
             <View style={styles.heroCircle}>
               <Layout size={40} color={BuddyTheme.colors.primary} />
             </View>
-            <Text style={styles.heroTitle}>Initiate Collaboration</Text>
+            <Text style={styles.heroTitle}>Start doing cool stuff together</Text>
             <Text style={styles.heroDescription}>
-              Anonymous, task-based networking. Trust build through shared execution.
+              Skip the small talk. Connections grow through shared action. Establish your first group task.
             </Text>
 
             <TouchableOpacity

@@ -64,9 +64,9 @@ export default function InterestsScreen() {
                 contentContainerStyle={styles.content}
             >
                 <Animated.View entering={FadeInDown.delay(200)} style={styles.header}>
-                    <Text style={styles.title}>What Gets You Going?</Text>
+                    <Text style={styles.title}>Explore Shared Focus</Text>
                     <Text style={styles.subtitle}>
-                        Pick 3–5 vibes — these spark your first tasks. No wrong picks. The weirder, the better matches.
+                        Pick 3–5 focus areas. These establish the basis for shared group tasks. No wrong picks—just observation points.
                     </Text>
                 </Animated.View>
 
@@ -115,10 +115,10 @@ export default function InterestsScreen() {
                         <View style={styles.progressSection}>
                             <Text style={styles.progressLabel}>
                                 {selected.length < 3
-                                    ? `Need ${3 - selected.length} more pieces`
+                                    ? `Need ${3 - selected.length} more focus points`
                                     : selected.length === 5
-                                        ? "Solid lineup — ready for epic collabs! 🚀"
-                                        : `${selected.length}/5 pieces connected`}
+                                        ? "Solid lineup — ready for group tasks! 🚀"
+                                        : `${selected.length}/5 points connected`}
                             </Text>
                             <View style={styles.track}>
                                 <View style={[styles.bar, { width: `${(selected.length / 5) * 100}%` }]} />
@@ -132,7 +132,7 @@ export default function InterestsScreen() {
                             disabled={selected.length < 3}
                             onPress={() => router.push('/onboarding/vibe')}
                         >
-                            <Text style={styles.buttonText}>Next: Your Energy Style</Text>
+                            <Text style={styles.buttonText}>Next: Match Energy Style</Text>
                         </TouchableOpacity>
                     </Animated.View>
                 </View>
