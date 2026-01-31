@@ -7,6 +7,7 @@ import DraggableFlatList, { RenderItemParams, ScaleDecorator } from 'react-nativ
 import { GestureHandlerRootView, TouchableOpacity as GHTouchableOpacity } from 'react-native-gesture-handler';
 import Animated, { Easing, FadeInDown, FadeInRight, FadeInUp, SlideInDown, useAnimatedStyle, useSharedValue, withDelay, withRepeat, withSequence, withTiming, ZoomIn } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { Level3TaskHandler } from '../../app/components/Level3Tasks';
 import { BuddyTheme } from '../../constants/BuddyTheme';
 import taskData from '../../task.json';
 
@@ -25,7 +26,7 @@ interface Message {
 }
 
 export default function TaskScreen() {
-    const { id, count, level } = useLocalSearchParams();
+    const { id, count, level, decision } = useLocalSearchParams();
     const router = useRouter();
 
     const currentTask = taskData.tasks.find(t => t.id.toString() === id);
@@ -39,7 +40,7 @@ export default function TaskScreen() {
         // For binary tasks, we don't flat map yet, we keep them as pairs for the row-based UI
         return currentTask.options.map((option: any, index: number) => ({
             id: (index + 1).toString(),
-            text: option,
+            text: typeof option === 'string' ? option : (option.label || JSON.stringify(option)),
             addedBy: 'partner', // Placeholder
             timestamp: `Phase ${index + 1}`
         }));
@@ -59,6 +60,7 @@ export default function TaskScreen() {
     const [showScore, setShowScore] = useState(false);
     const [score, setScore] = useState(0);
     const [showUnlock, setShowUnlock] = useState(false);
+    const [showLevel3Unlock, setShowLevel3Unlock] = useState(false);
 
     // Showdown State
     const [currentCardIndex, setCurrentCardIndex] = useState(0);
@@ -66,6 +68,16 @@ export default function TaskScreen() {
     const [showdownRevealed, setShowdownRevealed] = useState(false);
     const [isPartnerWaiting, setIsPartnerWaiting] = useState(false);
     const [showDragonAnim, setShowDragonAnim] = useState(false);
+
+    // Decider Engine State
+    const [startTime, setStartTime] = useState(Date.now());
+    const [firstActionTime, setFirstActionTime] = useState<number | null>(null);
+    const [lastActionTime, setLastActionTime] = useState(Date.now());
+    const [maxIdleGap, setMaxIdleGap] = useState(0);
+    const [reactionCount, setReactionCount] = useState(0);
+    const [myActionCount, setMyActionCount] = useState(0);
+    const [partnerActionCount, setPartnerActionCount] = useState(0);
+    const [deciderCategory, setDeciderCategory] = useState<'GREEN' | 'YELLOW' | 'ORANGE' | 'RED' | null>(null);
 
     // Animation values
     const dragonX = useSharedValue(-500);
@@ -75,18 +87,22 @@ export default function TaskScreen() {
     const friendsY = useSharedValue(800);
     const friendsScale = useSharedValue(0.5);
     const bgOpacity = useSharedValue(0);
+    const resonancePulse = useSharedValue(0.8);
 
     // Sync taskCount from params when they change
     React.useEffect(() => {
         if (count) setTaskCount(parseInt(count as string));
-    }, [count]);
+        if (currentLevel === 3) {
+            resonancePulse.value = withRepeat(withTiming(1, { duration: 1500 }), -1, true);
+        }
+    }, [count, currentLevel]);
 
     // Reset items and state when ID changes (new task in session)
     React.useEffect(() => {
         if (currentTask) {
             const initialItems: TaskItem[] = currentTask.options?.map((option: any, index: number) => ({
                 id: (index + 1).toString(),
-                text: typeof option === 'string' ? option : option.text || '',
+                text: typeof option === 'string' ? option : (option.label || JSON.stringify(option)),
                 addedBy: 'partner' as const,
                 timestamp: `Item ${index + 1}`
             })) || [];
@@ -96,8 +112,29 @@ export default function TaskScreen() {
             setCurrentCardIndex(0);
             setShowdownRevealed(false);
             setShowdownSelections({});
+
+            // Reset Decider metrics for new task
+            setStartTime(Date.now());
+            setFirstActionTime(null);
+            setLastActionTime(Date.now());
+            setMaxIdleGap(0);
+            setReactionCount(0);
+            setMyActionCount(0);
+            setPartnerActionCount(0);
         }
     }, [id]);
+
+    const trackAction = (isMe: boolean) => {
+        const now = Date.now();
+        if (firstActionTime === null) setFirstActionTime(now - startTime);
+
+        const gap = (now - lastActionTime) / 1000;
+        if (gap > maxIdleGap) setMaxIdleGap(gap);
+        setLastActionTime(now);
+
+        if (isMe) setMyActionCount(prev => prev + 1);
+        else setPartnerActionCount(prev => prev + 1);
+    };
 
     const chatUnlocked = currentLevel >= 2;
     const voiceUnlocked = currentLevel >= 3;
@@ -107,6 +144,7 @@ export default function TaskScreen() {
 
     const addItem = () => {
         if (!inputText.trim()) return;
+        trackAction(true);
         setItems([...items, {
             id: Date.now().toString(),
             text: inputText,
@@ -118,17 +156,18 @@ export default function TaskScreen() {
 
     const completeTask = () => {
         setIsDone(true);
-        setTimeout(() => {
-            const baseScore = 75;
-            const randomAdd = Math.floor(Math.random() * 20);
-            setScore(baseScore + randomAdd);
-            setShowScore(true);
-            setIsDone(false);
-        }, 1200);
+        const baseScore = 75;
+        const randomAdd = Math.floor(Math.random() * 20);
+        setScore(baseScore + randomAdd);
+        setShowScore(true);
+        setIsDone(false);
     };
 
-    const startLevel2Transition = () => {
+    const startLevelTransition = (nextLevel: number) => {
+        setIsDone(false);
+        setShowScore(false);
         setShowUnlock(false);
+        setShowLevel3Unlock(false);
         setShowDragonAnim(true);
 
         // Dragon flying sequence
@@ -146,7 +185,7 @@ export default function TaskScreen() {
             true
         );
 
-        // Background fade
+        // Background fade (Midnight Purple for L3)
         bgOpacity.value = withTiming(1, { duration: 1000 });
 
         // Friends slide in and jump
@@ -162,20 +201,54 @@ export default function TaskScreen() {
         );
 
         setTimeout(() => {
+            const nextLevelTasks = taskData.tasks.filter(t => t.level === nextLevel);
+            const nextId = nextLevelTasks[Math.floor(Math.random() * nextLevelTasks.length)].id;
+
             router.replace({
                 pathname: '/task/[id]',
-                params: { id: '6', count: '1', level: '2' }
+                params: { id: nextId.toString(), count: '1', level: nextLevel.toString() }
             });
             setShowDragonAnim(false);
             bgOpacity.value = 0; // Reset for next time
         }, 9000);
     };
 
+    const calculateDeciderScores = () => {
+        // 1. Momentum Score
+        let momentum = 25; // Base for completion
+        if (firstActionTime && firstActionTime < 30000) momentum += 20;
+        if (maxIdleGap < 60) momentum += 20;
+        // Simulated re-match acceptance for now
+        momentum += 35;
+        momentum = Math.min(100, momentum);
+
+        // 2. Resonance Score
+        // In current level, matching too much is "boring", matching too little is "friction"
+        // base score from the sync rate
+        let resonance = score;
+
+        // 3. Balance Score
+        const totalActions = myActionCount + partnerActionCount;
+        const ratio = totalActions === 0 ? 0 : Math.min(myActionCount, partnerActionCount) / Math.max(myActionCount, partnerActionCount);
+        const balance = Math.round(ratio * 100);
+
+        return { momentum, resonance, balance };
+    };
+
+    const getDecision = (scores: { momentum: number, resonance: number, balance: number }) => {
+        const { momentum, resonance, balance } = scores;
+
+        if (momentum >= 70 && balance >= 60 && resonance >= 45 && resonance <= 80) return 'GREEN';
+        if (momentum >= 35 && balance >= 30 && (resonance < 35)) return 'ORANGE';
+        if (momentum < 35 || balance < 30) return 'RED';
+        return 'YELLOW';
+    };
+
     const proceedToNext = () => {
         setShowScore(false);
 
         if (taskCount < 4) {
-            // Pick next Level 1 task
+            // Level 1 logic
             const level1Tasks = taskData.tasks.filter(t => t.level === 1 && t.id.toString() !== id);
             const nextId = level1Tasks[Math.floor(Math.random() * level1Tasks.length)].id;
 
@@ -186,17 +259,38 @@ export default function TaskScreen() {
         } else if (currentLevel === 1) {
             // Show Level 2 Unlock Moment
             setShowUnlock(true);
-        } else {
-            // Level 2 sequence or reveal
-            setTaskCount(prev => prev + 1);
-            if (taskCount >= 4) {
-                setShowReveal(true);
+        } else if (currentLevel === 2) {
+            const scores = calculateDeciderScores();
+            const decision = getDecision(scores);
+            setDeciderCategory(decision);
+
+            if (decision === 'RED') {
+                router.replace('/(tabs)');
+                return;
             }
+
+            // Trigger Level 3 transition after ANY Level 2 task for testing
+            setShowLevel3Unlock(true);
+        } else {
+            // Level 3+ logic
+            const level3Tasks = taskData.tasks.filter(t => t.level === 3 && t.id.toString() !== id);
+            const nextId = level3Tasks[Math.floor(Math.random() * level3Tasks.length)].id;
+
+            router.replace({
+                pathname: '/task/[id]',
+                params: {
+                    id: nextId.toString(),
+                    count: (taskCount + 1).toString(),
+                    level: currentLevel.toString()
+                }
+            });
         }
     };
 
     const sendMessage = () => {
         if (!chatInput.trim()) return;
+        trackAction(true);
+        setReactionCount(prev => prev + 1);
         const finalMessage = currentLevel === 2 ? chatInput.substring(0, 120) : chatInput;
         setMessages([...messages, { id: Date.now().toString(), text: finalMessage, sender: 'me' }]);
         setChatInput('');
@@ -218,6 +312,7 @@ export default function TaskScreen() {
 
     const toggleBinarySelection = (itemId: string, choice: string) => {
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+        trackAction(true);
         setBinarySelections(prev => ({
             ...prev,
             [itemId]: choice
@@ -226,11 +321,13 @@ export default function TaskScreen() {
 
     const handleShowdownChoice = (choiceValue: string) => {
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+        trackAction(true);
         setShowdownSelections(prev => ({ ...prev, [currentCardIndex]: choiceValue }));
         setIsPartnerWaiting(true);
 
         // Simulated partner delay
         setTimeout(() => {
+            trackAction(false);
             setIsPartnerWaiting(false);
             if (currentCardIndex < (currentTask?.options?.length || 0) - 1) {
                 setCurrentCardIndex(prev => prev + 1);
@@ -287,42 +384,74 @@ export default function TaskScreen() {
     }));
 
     const dragonBgStyle = useAnimatedStyle(() => ({
-        backgroundColor: '#1E1B4B', // Midnight Blue for transition
+        backgroundColor: currentLevel === 1 ? '#1E1B4B' : '#2D1B4B', // Shift from Blue to Deep Purple for Level 3
         opacity: bgOpacity.value,
         ...StyleSheet.absoluteFillObject,
     }));
 
-    const renderTaskHeader = () => (
-        <View style={{ width: '100%' }}>
-            <View style={styles.header}>
-                <View style={{ flex: 1, marginRight: 16 }}>
-                    <Text style={[styles.taskTitle, currentLevel === 2 && styles.level2Text]}>
-                        {currentTask ? currentTask.title : 'Active Collaboration'}
-                    </Text>
-                    <Text style={[styles.taskSubtitle, currentLevel === 2 && styles.level2TextSecondary]}>
-                        {currentTask ? `${currentTask.interest} • ${currentTask.duration}` : `Task ${taskCount}/4 • Level ${currentLevel}`}
-                    </Text>
-                    <Text style={[styles.levelBadge, currentLevel === 2 && styles.level2Accent]}>Level {currentLevel} • Task {taskCount}/4</Text>
-                </View>
-                <TouchableOpacity
-                    activeOpacity={0.7}
-                    style={styles.leaveButton}
-                    onPress={() => router.canGoBack() ? router.back() : router.replace('/(tabs)')}
-                >
-                    <LogOut size={22} color={BuddyTheme.colors.textSecondary} />
-                </TouchableOpacity>
-            </View>
+    const resonanceStyle = useAnimatedStyle(() => ({
+        opacity: resonancePulse.value,
+        borderColor: resonancePulse.value > 0.9 ? '#4ADE80' : '#334155',
+    }));
 
-            <View style={styles.descriptionBox}>
-                <Text style={styles.descriptionText}>
-                    {currentTask ? currentTask.description : 'Collaborate with your partner to complete this task and unlock deeper levels of connection.'}
-                </Text>
+    const renderTaskHeader = () => {
+        const deciderCopy = decision === 'GREEN' ? "Continuing with a familiar group"
+            : decision === 'YELLOW' ? "Same task, different angle"
+                : decision === 'ORANGE' ? "Trying something lighter"
+                    : decision === 'RED' ? "Mixing things up this time"
+                        : null;
+
+        return (
+            <View style={{ width: '100%' }}>
+                <View style={[styles.header, currentLevel >= 2 && styles.level2Header]}>
+                    <View style={{ flex: 1, marginRight: 16 }}>
+                        <Text style={styles.levelBadge}>
+                            {currentLevel === 3 ? 'Continuity Phase' : `Level ${currentLevel}`}
+                        </Text>
+                        <Text style={[styles.taskTitle, currentLevel >= 2 && styles.level2Text]}>
+                            {currentTask ? currentTask.title : 'Active Collaboration'}
+                        </Text>
+                        <Text style={[styles.taskSubtitle, currentLevel >= 2 && styles.level2TextSecondary]}>
+                            {currentLevel === 3
+                                ? `Resonance Milestone: ${Math.floor(taskCount / 2)} • Relational Gravity`
+                                : (deciderCopy || (currentTask ? `${currentTask.interest} • ${currentTask.duration}` : `Phase ${taskCount} Coordination`))}
+                        </Text>
+                    </View>
+                    <TouchableOpacity
+                        activeOpacity={0.7}
+                        style={styles.leaveButton}
+                        onPress={() => router.canGoBack() ? router.back() : router.replace('/(tabs)')}
+                    >
+                        <LogOut size={22} color={BuddyTheme.colors.textSecondary} />
+                    </TouchableOpacity>
+                </View>
+
+                {currentLevel === 3 && (
+                    <Animated.View style={[styles.resonanceBar, resonanceStyle]}>
+                        <View style={styles.resonanceTrack}>
+                            <View style={[styles.resonanceFill, { width: '85%' }]} />
+                        </View>
+                        <Text style={styles.resonanceText}>Relational Gravity: High Pulse</Text>
+                    </Animated.View>
+                )}
+
+                {currentTask?.description && (
+                    <View style={[styles.descriptionBox, currentLevel >= 2 && styles.level2DescriptionBox]}>
+                        <Text style={[styles.descriptionText, currentLevel >= 2 && styles.level2DescriptionText]}>
+                            {currentTask.description}
+                        </Text>
+                    </View>
+                )}
             </View>
-        </View>
-    );
+        );
+    };
 
     return (
-        <SafeAreaView style={[styles.container, currentLevel === 2 && styles.level2Container]}>
+        <SafeAreaView style={[
+            styles.container,
+            currentLevel === 2 && styles.level2Container,
+            currentLevel === 3 && styles.level3Container
+        ]}>
             <View style={{ flex: 1 }}>
                 {!showDragonAnim && (
                     <KeyboardAvoidingView
@@ -330,7 +459,19 @@ export default function TaskScreen() {
                         style={{ flex: 1 }}
                     >
                         <GestureHandlerRootView style={{ flex: 1 }}>
-                            {currentTask?.type === 'ranking' ? (
+                            {['sync_haptic', 'pulse_compass', 'negotiate', 'mosaic', 'echo_sequence'].includes(currentTask?.type || '') ? (
+                                <View style={{ flex: 1, paddingTop: 20 }}>
+                                    {renderTaskHeader()}
+                                    <Level3TaskHandler
+                                        type={currentTask?.type!}
+                                        options={currentTask?.options}
+                                        onComplete={() => {
+                                            Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+                                            setShowScore(true);
+                                        }}
+                                    />
+                                </View>
+                            ) : currentTask?.type === 'ranking' ? (
                                 <DraggableFlatList
                                     data={items}
                                     onDragEnd={({ data }) => {
@@ -409,17 +550,20 @@ export default function TaskScreen() {
                                             </View>
 
                                             <Text style={styles.showdownOptionText}>
-                                                {currentTask.options?.[currentCardIndex]}
+                                                {typeof currentTask.options?.[currentCardIndex] === 'string'
+                                                    ? (currentTask.options[currentCardIndex] as string)
+                                                    : ((currentTask.options?.[currentCardIndex] as any)?.label || "")}
                                             </Text>
 
                                             <View style={[
                                                 styles.showdownActions,
-                                                currentTask.options?.[currentCardIndex].includes(' vs ') && { flexDirection: 'row', flexWrap: 'wrap' }
+                                                (typeof currentTask.options?.[currentCardIndex] === 'string' &&
+                                                    (currentTask.options[currentCardIndex] as string).includes(' vs ')) && { flexDirection: 'row', flexWrap: 'wrap' }
                                             ]}>
                                                 {isPartnerWaiting ? (
                                                     <View style={styles.partnerDecisionCard}>
                                                         <ActivityIndicator color={BuddyTheme.colors.secondary} size="large" />
-                                                        <Text style={styles.partnerDecisionText}>Partner is deciding...</Text>
+                                                        <Text style={styles.partnerDecisionText}>Someone is deciding...</Text>
                                                     </View>
                                                 ) : (
                                                     currentTask.showdownButtons ? (
@@ -432,8 +576,9 @@ export default function TaskScreen() {
                                                                 <Text style={styles.showdownButtonText}>{btn.label}</Text>
                                                             </TouchableOpacity>
                                                         ))
-                                                    ) : currentTask.options?.[currentCardIndex].includes(' vs ') ? (
-                                                        currentTask.options[currentCardIndex].split(' vs ').map((choice: string, i: number) => (
+                                                    ) : (typeof currentTask.options?.[currentCardIndex] === 'string' &&
+                                                        (currentTask.options[currentCardIndex] as string).includes(' vs ')) ? (
+                                                        (currentTask.options[currentCardIndex] as string).split(' vs ').map((choice: string, i: number) => (
                                                             <TouchableOpacity
                                                                 key={i}
                                                                 style={[styles.showdownButton, { flex: 1, minWidth: '45%' }]}
@@ -459,25 +604,27 @@ export default function TaskScreen() {
                                     ) : (
                                         <Animated.View entering={ZoomIn} style={[styles.showdownResultCard, { marginTop: 20 }]}>
                                             <View style={styles.sharedBadge}>
-                                                <Text style={styles.sharedBadgeText}>REVEALED</Text>
+                                                <Text style={styles.sharedBadgeText}>Shared Result</Text>
                                             </View>
                                             <Text style={styles.resultMatchText}>You matched on 4/5 takes</Text>
                                             <View style={styles.resultSummary}>
                                                 <View style={styles.summaryItem}>
                                                     <View style={[styles.summaryIndicator, { backgroundColor: '#4ADE80' }]} />
-                                                    <Text style={styles.summaryText}>Same instinct (4)</Text>
+                                                    <Text style={styles.summaryText}>You saw this similarly (4)</Text>
                                                 </View>
                                                 <View style={styles.summaryItem}>
                                                     <View style={[styles.summaryIndicator, { backgroundColor: '#F87171' }]} />
-                                                    <Text style={styles.summaryText}>Opposite instinct (1)</Text>
+                                                    <Text style={styles.summaryText}>Different instincts here (1)</Text>
                                                 </View>
                                             </View>
-                                            <Text style={styles.resultTip}>That’s interesting... curiosity unlocked.</Text>
+                                            <Text style={styles.resultTip}>This one split the group.</Text>
 
                                             <View style={styles.revealedList}>
-                                                {currentTask.options?.map((opt: string, i: number) => (
+                                                {currentTask.options?.map((opt: any, i: number) => (
                                                     <View key={i} style={styles.revealedRow}>
-                                                        <Text style={styles.revealedOption}>{opt}</Text>
+                                                        <Text style={styles.revealedOption}>
+                                                            {typeof opt === 'string' ? opt : (opt.label || JSON.stringify(opt))}
+                                                        </Text>
                                                         <View style={styles.matchTag}>
                                                             <Text style={styles.matchTagText}>{i === 2 ? 'Opposite' : 'Same'}</Text>
                                                         </View>
@@ -638,7 +785,7 @@ export default function TaskScreen() {
                                             style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}
                                             entering={FadeInRight}
                                         >
-                                            <Text style={styles.doneText}>{isDone ? 'Syncing...' : isNoTypingTask ? "Complete Selection" : "Finish Phase"}</Text>
+                                            <Text style={styles.doneText}>{isDone ? 'Syncing...' : isNoTypingTask ? "Shared Finish" : "Finish Phase together"}</Text>
                                             <CheckCircle2 size={18} color="#FFF" />
                                         </Animated.View>
                                     </TouchableOpacity>
@@ -660,7 +807,7 @@ export default function TaskScreen() {
                                     disabled={isDone}
                                     activeOpacity={0.8}
                                 >
-                                    <Text style={styles.floatingDoneText}>{isDone ? 'Syncing...' : 'Complete Selection'}</Text>
+                                    <Text style={styles.floatingDoneText}>{isDone ? 'Syncing...' : 'Shared Finish'}</Text>
                                     <CheckCircle2 size={20} color="#FFF" />
                                 </TouchableOpacity>
                             </Animated.View>
@@ -734,148 +881,197 @@ export default function TaskScreen() {
                                 </Animated.View>
                             </View>
                         </Modal>
-
-                        {/* Identity Reveal Modal */}
-                        <Modal
-                            visible={showReveal}
-                            animationType="fade"
-                            transparent={true}
-                        >
-                            <View style={styles.revealOverlay}>
-                                <Animated.View entering={ZoomIn} style={styles.revealContent}>
-                                    <Text style={styles.revealTitle}>Layer 4 Established</Text>
-                                    <Text style={styles.revealSubtitle}>
-                                        Sufficient shared history has been recorded. Mutual identity disclosure is now available.
-                                    </Text>
-
-                                    <View style={styles.revealActions}>
-                                        <TouchableOpacity
-                                            activeOpacity={0.9}
-                                            style={styles.revealButton}
-                                            onPress={() => {
-                                                setRevealed(true);
-                                                setShowReveal(false);
-                                            }}
-                                        >
-                                            <User size={20} color="#FFF" />
-                                            <Text style={styles.revealButtonText}>Reveal My Identity</Text>
-                                        </TouchableOpacity>
-
-                                        <TouchableOpacity
-                                            style={styles.notReadyButton}
-                                            onPress={() => setShowReveal(false)}
-                                        >
-                                            <Text style={styles.notReadyText}>Continue Anonymously</Text>
-                                        </TouchableOpacity>
-                                    </View>
-                                </Animated.View>
-                            </View>
-                        </Modal>
-
-                        {/* Compatibility Score Modal */}
-                        <Modal
-                            visible={showScore}
-                            animationType="fade"
-                            transparent={true}
-                        >
-                            <View style={styles.scoreOverlay}>
-                                <Animated.View entering={ZoomIn.duration(600)} style={styles.scoreContent}>
-                                    <View style={styles.sharedBadge}>
-                                        <Text style={styles.sharedBadgeText}>VISIBLE TO BOTH</Text>
-                                    </View>
-
-                                    <Text style={styles.scoreLabel}>Phase {taskCount} Compatibility</Text>
-
-                                    <Animated.View entering={ZoomIn.duration(800).delay(400).springify()} style={styles.scoreCircle}>
-                                        <Text style={styles.scoreValue}>{score}%</Text>
-                                        <Text style={styles.scoreSubtext}>Sync Rate</Text>
-                                    </Animated.View>
-
-                                    <Animated.View entering={FadeInDown.delay(800)} style={{ width: '100%', alignItems: 'center' }}>
-                                        <Text style={styles.scoreMessage}>
-                                            {score > 90
-                                                ? "Perfect wavelength! You both think remarkably alike."
-                                                : score > 85
-                                                    ? "Strong alignment detected. Great collaboration!"
-                                                    : "You're building a unique synergy together."}
-                                        </Text>
-
-                                        {currentLevel === 2 && (
-                                            <View style={styles.reactionInvite}>
-                                                <Text style={styles.reactionInviteText}>Safe pattern detected. Add a micro-reflection?</Text>
-                                                <TouchableOpacity
-                                                    style={styles.reactionInviteButton}
-                                                    onPress={() => {
-                                                        setShowScore(false);
-                                                        setShowChat(true);
-                                                    }}
-                                                >
-                                                    <Smile size={18} color={BuddyTheme.colors.primary} />
-                                                    <Text style={styles.reactionInviteButtonText}>React</Text>
-                                                </TouchableOpacity>
-                                            </View>
-                                        )}
-
-                                        <TouchableOpacity
-                                            style={styles.continueButton}
-                                            onPress={proceedToNext}
-                                            activeOpacity={0.8}
-                                        >
-                                            <Text style={styles.continueButtonText}>Continue to Task {taskCount + 1}</Text>
-                                        </TouchableOpacity>
-                                    </Animated.View>
-                                </Animated.View>
-                            </View>
-                        </Modal>
-
-                        {/* Level 2 Unlock Modal */}
-                        <Modal
-                            visible={showUnlock}
-                            animationType="fade"
-                            transparent={true}
-                        >
-                            <View style={styles.revealOverlay}>
-                                <Animated.View entering={ZoomIn} style={styles.unlockContent}>
-                                    <View style={styles.sharedBadge}>
-                                        <Text style={styles.sharedBadgeText}>LEVEL 2 UNLOCKED</Text>
-                                    </View>
-                                    <Text style={styles.revealTitle}>Context Unlocked</Text>
-                                    <Text style={styles.revealSubtitle}>
-                                        You've completed 4 tasks together. Patterns are emerging. You can now add micro-reactions to shared outcomes.
-                                    </Text>
-
-                                    <View style={styles.unlockFeatures}>
-                                        <View style={styles.featureItem}>
-                                            <Smile size={20} color={BuddyTheme.colors.secondary} />
-                                            <Text style={styles.featureText}>Tap-to-react chips</Text>
-                                        </View>
-                                        <View style={styles.featureItem}>
-                                            <MessageSquare size={20} color={BuddyTheme.colors.secondary} />
-                                            <Text style={styles.featureText}>120-character micro-context</Text>
-                                        </View>
-                                    </View>
-
-                                    <View style={styles.revealActions}>
-                                        <TouchableOpacity
-                                            activeOpacity={0.9}
-                                            style={styles.revealButton}
-                                            onPress={startLevel2Transition}
-                                        >
-                                            <Text style={styles.revealButtonText}>Enter Phase 2</Text>
-                                        </TouchableOpacity>
-
-                                        <TouchableOpacity
-                                            style={styles.notReadyButton}
-                                            onPress={() => setShowUnlock(false)}
-                                        >
-                                            <Text style={styles.notReadyText}>Skip for now</Text>
-                                        </TouchableOpacity>
-                                    </View>
-                                </Animated.View>
-                            </View>
-                        </Modal>
                     </KeyboardAvoidingView>
                 )}
+
+                {/* All Modals should be at the root level for reliability */}
+                {/* Identity Reveal Modal */}
+                <Modal
+                    visible={showReveal}
+                    animationType="fade"
+                    transparent={true}
+                >
+                    <View style={styles.revealOverlay}>
+                        <Animated.View entering={ZoomIn} style={styles.revealContent}>
+                            <Text style={styles.revealTitle}>Names can make coordination easier</Text>
+                            <Text style={styles.revealSubtitle}>
+                                Identity disclosure is purely optional. Sharing first names can sometimes help with coordination in complex tasks.
+                            </Text>
+
+                            <View style={styles.revealActions}>
+                                <TouchableOpacity
+                                    activeOpacity={0.9}
+                                    style={styles.revealButton}
+                                    onPress={() => {
+                                        setRevealed(true);
+                                        setShowReveal(false);
+                                    }}
+                                >
+                                    <User size={20} color="#FFF" />
+                                    <Text style={styles.revealButtonText}>Optional: share first name</Text>
+                                </TouchableOpacity>
+
+                                <TouchableOpacity
+                                    style={styles.unlockButton}
+                                    onPress={() => startLevelTransition(2)}
+                                >
+                                    <Text style={styles.unlockButtonText}>Fly to Level 2</Text>
+                                </TouchableOpacity>
+
+                                <TouchableOpacity
+                                    style={styles.notReadyButton}
+                                    onPress={() => setShowReveal(false)}
+                                >
+                                    <Text style={styles.notReadyText}>Only if it helps</Text>
+                                </TouchableOpacity>
+                            </View>
+                        </Animated.View>
+                    </View>
+                </Modal>
+
+                {/* Compatibility Score Modal */}
+                <Modal
+                    visible={showScore}
+                    animationType="fade"
+                    transparent={true}
+                >
+                    <View style={styles.scoreOverlay}>
+                        <Animated.View entering={ZoomIn.duration(600)} style={styles.scoreContent}>
+                            <View style={styles.sharedBadge}>
+                                <Text style={styles.sharedBadgeText}>Shared Result</Text>
+                            </View>
+
+                            <Text style={styles.scoreLabel}>Task completed together</Text>
+
+                            <Animated.View entering={ZoomIn.duration(800).delay(400).springify()} style={styles.scoreCircle}>
+                                <Text style={styles.scoreValue}>{score}%</Text>
+                                <Text style={styles.scoreSubtext}>Sync Rate</Text>
+                            </Animated.View>
+
+                            <Animated.View entering={FadeInDown.delay(800)} style={{ width: '100%', alignItems: 'center' }}>
+                                <Text style={styles.scoreMessage}>
+                                    {score > 90
+                                        ? "You aligned on almost every choice."
+                                        : score > 85
+                                            ? "You synced quickly on this task."
+                                            : `This is your ${taskCount} task together.`}
+                                </Text>
+
+                                {currentLevel >= 2 && (
+                                    <View style={styles.reactionInvite}>
+                                        <Text style={styles.reactionInviteText}>You usually finish tasks smoothly. Add a micro-reflection?</Text>
+                                        <TouchableOpacity
+                                            style={styles.reactionInviteButton}
+                                            onPress={() => {
+                                                setShowScore(false);
+                                                setShowChat(true);
+                                            }}
+                                        >
+                                            <Smile size={18} color={BuddyTheme.colors.primary} />
+                                            <Text style={styles.reactionInviteButtonText}>React</Text>
+                                        </TouchableOpacity>
+                                    </View>
+                                )}
+
+                                <TouchableOpacity
+                                    style={styles.continueButton}
+                                    onPress={proceedToNext}
+                                    activeOpacity={0.8}
+                                >
+                                    <Text style={styles.continueButtonText}>One more round together?</Text>
+                                </TouchableOpacity>
+                            </Animated.View>
+                        </Animated.View>
+                    </View>
+                </Modal>
+
+                {/* Level 2 Unlock Modal */}
+                <Modal
+                    visible={showUnlock}
+                    animationType="fade"
+                    transparent={true}
+                >
+                    <View style={styles.revealOverlay}>
+                        <Animated.View entering={ZoomIn} style={styles.unlockContent}>
+                            <View style={styles.sharedBadge}>
+                                <Text style={styles.sharedBadgeText}>Patterns are emerging</Text>
+                            </View>
+                            <Text style={styles.revealTitle}>Continuing the shared thread</Text>
+                            <Text style={styles.revealSubtitle}>
+                                You've completed 4 tasks together. This group tends to agree quickly. You can now add micro-reactions to shared results.
+                            </Text>
+
+                            <View style={styles.unlockFeatures}>
+                                <View style={styles.featureItem}>
+                                    <Smile size={20} color={BuddyTheme.colors.secondary} />
+                                    <Text style={styles.featureText}>Tap-to-react chips</Text>
+                                </View>
+                                <View style={styles.featureItem}>
+                                    <MessageSquare size={20} color={BuddyTheme.colors.secondary} />
+                                    <Text style={styles.featureText}>120-character micro-context</Text>
+                                </View>
+                            </View>
+
+                            <View style={styles.revealActions}>
+                                <TouchableOpacity
+                                    activeOpacity={0.9}
+                                    style={styles.revealButton}
+                                    onPress={() => startLevelTransition(2)}
+                                >
+                                    <Text style={styles.revealButtonText}>Continue together</Text>
+                                </TouchableOpacity>
+
+                                <TouchableOpacity
+                                    style={styles.notReadyButton}
+                                    onPress={() => setShowUnlock(false)}
+                                >
+                                    <Text style={styles.notReadyText}>Skip for now</Text>
+                                </TouchableOpacity>
+                            </View>
+                        </Animated.View>
+                    </View>
+                </Modal>
+
+                {/* Level 3 Unlock Modal */}
+                <Modal
+                    visible={showLevel3Unlock}
+                    animationType="fade"
+                    transparent={true}
+                >
+                    <View style={styles.revealOverlay}>
+                        <Animated.View entering={ZoomIn} style={styles.unlockContent}>
+                            <View style={styles.sharedBadge}>
+                                <Text style={styles.sharedBadgeText}>Persistence Unlocked</Text>
+                            </View>
+                            <Text style={styles.revealTitle}>The Shared Artifact</Text>
+                            <Text style={styles.revealSubtitle}>
+                                You've proven a deep rhythmic and intellectual sync. You can now build persistent artifacts and engage in haptic-first tasks.
+                            </Text>
+
+                            <View style={styles.unlockFeatures}>
+                                <View style={styles.featureItem}>
+                                    <Smile size={20} color={BuddyTheme.colors.secondary} />
+                                    <Text style={styles.featureText}>Haptic Rhythm Mirroring</Text>
+                                </View>
+                                <View style={styles.featureItem}>
+                                    <GripVertical size={20} color={BuddyTheme.colors.secondary} />
+                                    <Text style={styles.featureText}>Collaborative Persistence</Text>
+                                </View>
+                                <View style={styles.featureItem}>
+                                    <CheckCircle2 size={20} color={BuddyTheme.colors.secondary} />
+                                    <Text style={styles.featureText}>Asymmetric Roleplay</Text>
+                                </View>
+                            </View>
+
+                            <TouchableOpacity
+                                style={styles.unlockButton}
+                                onPress={() => startLevelTransition(3)}
+                            >
+                                <Text style={styles.unlockButtonText}>Evolve to Level 3</Text>
+                            </TouchableOpacity>
+                        </Animated.View>
+                    </View>
+                </Modal>
 
                 {showDragonAnim && (
                     <View style={StyleSheet.absoluteFillObject}>
@@ -907,6 +1103,12 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: BuddyTheme.colors.background,
     },
+    level2Container: {
+        backgroundColor: '#0F172A',
+    },
+    level3Container: {
+        backgroundColor: '#110C1D', // Deep Obsidian Purple
+    },
     header: {
         paddingVertical: 24,
         paddingHorizontal: 20,
@@ -914,16 +1116,25 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
         alignItems: 'flex-start',
     },
+    level2Header: {
+        backgroundColor: '#0F172A',
+    },
     taskTitle: {
         fontSize: 24,
         fontWeight: 'bold',
         color: BuddyTheme.colors.primary,
+    },
+    level2Text: {
+        color: '#FFFFFF',
     },
     taskSubtitle: {
         fontSize: 13,
         color: BuddyTheme.colors.textSecondary,
         marginTop: 2,
         fontWeight: '500',
+    },
+    level2TextSecondary: {
+        color: '#94A3B8',
     },
     levelBadge: {
         fontSize: 11,
@@ -933,8 +1144,39 @@ const styles = StyleSheet.create({
         letterSpacing: 1,
         marginTop: 4,
     },
+    level2Accent: {
+        color: BuddyTheme.colors.secondary,
+    },
     leaveButton: {
         padding: 4,
+    },
+    resonanceBar: {
+        marginHorizontal: 20,
+        marginBottom: 16,
+        backgroundColor: '#1E293B',
+        padding: 12,
+        borderRadius: 12,
+        borderWidth: 1,
+        borderColor: '#334155',
+    },
+    resonanceTrack: {
+        height: 4,
+        backgroundColor: '#0F172A',
+        borderRadius: 2,
+        overflow: 'hidden',
+        marginBottom: 6,
+    },
+    resonanceFill: {
+        height: '100%',
+        backgroundColor: '#4ADE80',
+        borderRadius: 2,
+    },
+    resonanceText: {
+        fontSize: 10,
+        fontWeight: '900',
+        color: '#94A3B8',
+        textTransform: 'uppercase',
+        letterSpacing: 1,
     },
     descriptionBox: {
         marginHorizontal: 20,
@@ -945,10 +1187,17 @@ const styles = StyleSheet.create({
         borderWidth: 1.5,
         borderColor: BuddyTheme.colors.border,
     },
+    level2DescriptionBox: {
+        backgroundColor: '#1E293B',
+        borderColor: '#334155',
+    },
     descriptionText: {
         color: BuddyTheme.colors.textPrimary,
         lineHeight: 24,
         fontSize: 15,
+    },
+    level2DescriptionText: {
+        color: '#CBD5E1',
     },
     listContent: {
         paddingHorizontal: 20,
@@ -1516,9 +1765,6 @@ const styles = StyleSheet.create({
         fontWeight: '800',
         color: BuddyTheme.colors.textSecondary,
     },
-    level2Container: {
-        backgroundColor: '#0F172A',
-    },
     dragonContainer: {
         position: 'absolute',
         top: '20%',
@@ -1549,15 +1795,6 @@ const styles = StyleSheet.create({
     friendsImage: {
         width: '100%',
         height: '100%',
-    },
-    level2Text: {
-        color: '#F8FAFC',
-    },
-    level2TextSecondary: {
-        color: '#94A3B8',
-    },
-    level2Accent: {
-        color: '#F472B6',
     },
     taskReflectionArea: {
         padding: 16,
@@ -1693,6 +1930,19 @@ const styles = StyleSheet.create({
         fontSize: 14,
         fontWeight: '600',
         flex: 1,
+    },
+    unlockButton: {
+        backgroundColor: BuddyTheme.colors.primary,
+        width: '100%',
+        paddingVertical: 18,
+        borderRadius: 16,
+        alignItems: 'center',
+        marginTop: 20,
+    },
+    unlockButtonText: {
+        color: '#FFF',
+        fontSize: 16,
+        fontWeight: '800',
     },
     reactionInvite: {
         marginTop: 20,
